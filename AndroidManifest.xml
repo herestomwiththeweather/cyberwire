@@ -3,7 +3,7 @@
     package="org.opensourcecurrency.hack"
     android:versionCode="1"
     android:versionName="1.0" >
-
+    <uses-permission android:name="android.permission.INTERNET" />
     <uses-sdk android:minSdkVersion="10" />
 
     <application
@@ -20,6 +20,8 @@
         </activity>
         <activity android:name=".Prefs"
             android:label="@string/settings_label"></activity>
+        <activity
+            android:name=".WebViewActivity"></activity>
     </application>
 
 </manifest>
