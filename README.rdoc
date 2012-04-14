@@ -2,10 +2,6 @@
 
 Android app with OpenTransact support.
 
-== 
-
-  gem install oauth2_mac_client
-
 == Resources and Acknowledgements
 
 * View Source on GitHub (https://github.com/herestomwiththeweather/cyberwire)
