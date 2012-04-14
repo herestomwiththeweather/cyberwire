@@ -1,0 +1,16 @@
+= CyberWire
+
+Android app with OpenTransact support.
+
+== 
+
+  gem install oauth2_mac_client
+
+== Resources and Acknowledgements
+
+* View Source on GitHub (https://github.com/herestomwiththeweather/cyberwire)
+* RestTask.java is from "Android Recipes" (http://www.apress.com/9781430234135)
+
+== Copyright
+
+Copyright (c) 2012 Tom Brown. See LICENSE for details.
