@@ -7,7 +7,7 @@
       android:summary="Choose your Asset Provider"
       android:entries="@array/provider_names"
       android:entryValues="@array/provider_values"
-      android:defaultValue="http://192.168.1.26:3000"
+      android:defaultValue="http://192.168.1.26:3000 XH/Jov43AaMoE08mUtRvoQ== eDlJLK/2v46jJfjqFEgsAA+bOBU3cAlUHWz7rN+Yc4VZWoMGI3eMjX26+O33JfFQCnN5MTLSTPw7jhvXzaHyJw== http://192.168.1.26:3000/assets"
     />
    
 </PreferenceScreen>

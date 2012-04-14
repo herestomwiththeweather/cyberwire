@@ -6,8 +6,8 @@
       <item>demo.opensourcecurrency.org</item>
     </string-array>
     <string-array name="provider_values">
-      <item>http://picomoney.com</item>
-      <item>http://192.168.1.26:3000</item>
-      <item>http://demo.opensourcecurrency.org</item>
+      <item>http://picomoney.com cc6f64d61ae2c903d1bb 77338e2faebdc5e4a55a94f76c01940ad26d4ecf http://picomoney.com</item>
+      <item>http://192.168.1.26:3000 XH/Jov43AaMoE08mUtRvoQ== eDlJLK/2v46jJfjqFEgsAA+bOBU3cAlUHWz7rN+Yc4VZWoMGI3eMjX26+O33JfFQCnN5MTLSTPw7jhvXzaHyJw== http://192.168.1.26:3000/assets</item>
+      <item>http://demo.opensourcecurrency.org xBoHeeNNFt3LQ7U1tvAb8BVKr32duE6rdWtpCSFD HraYcLT5F5nRll5KF5tw8umdER3EOrsFXIEro67T http://demo.opensourcecurrency.org</item>
     </string-array>
 </resources>
