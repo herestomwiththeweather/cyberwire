@@ -2,11 +2,23 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
-    android:orientation="vertical" >
-
-    <TextView
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:text="@string/hello" />
-
+    android:orientation="horizontal" >
+   <ImageButton
+      android:id="@+id/send_button"
+      android:contentDescription="@string/send_desc"
+      android:layout_width="96dp"
+      android:layout_height="96dp"
+      android:src="@drawable/send" />
+   <ImageButton
+      android:id="@+id/profile_button"
+      android:contentDescription="@string/profile_desc"
+      android:layout_width="96dp"
+      android:layout_height="96dp"
+      android:src="@drawable/home" />
+   <ImageButton
+      android:id="@+id/transactions_button"
+      android:contentDescription="@string/transactions_desc"
+      android:layout_width="96dp"
+      android:layout_height="96dp"
+      android:src="@drawable/details" />
 </LinearLayout>

@@ -5,4 +5,8 @@
    <string name="login_label">Login</string>
    <string name="settings_label">Settings</string>
    <string name="exit_label">Exit</string>
+   
+   <string name="profile_desc">Profile</string>
+   <string name="send_desc">Send</string>
+   <string name="transactions_desc">Transactions</string>
 </resources>
