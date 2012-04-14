@@ -12,8 +12,6 @@ import android.net.Uri;
 import android.util.Log;
 
 public class WebViewActivity extends Activity {
-	private static final String TAG = "OpenTransact";
-
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -28,6 +26,8 @@ public class WebViewActivity extends Activity {
 			}
 		});
 		webview.setWebViewClient(new WebViewClient() {
+			private static final String TAG = "OpenTransact";
+
 			@Override
 			public void onPageStarted(WebView view, String url, Bitmap favicon) {
 				setTitle(url);
@@ -35,7 +35,7 @@ public class WebViewActivity extends Activity {
 			
 			@Override
 			public void onPageFinished(WebView view, String url) {
-				Log.d(TAG,"onPageFinished");
+				Log.d(TAG,"onPageFinished: " + url);
 
 				Uri uri = Uri.parse(url);
 				String code = uri.getQueryParameter("code");
