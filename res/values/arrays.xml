@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="provider_names">
+      <item>picomoney.com</item>
+      <item>192.168.1.26</item>
+      <item>demo.opensourcecurrency.org</item>
+    </string-array>
+    <string-array name="provider_values">
+      <item>http://picomoney.com</item>
+      <item>http://192.168.1.26</item>
+      <item>http://demo.opensourcecurrency.org</item>
+    </string-array>
+</resources>

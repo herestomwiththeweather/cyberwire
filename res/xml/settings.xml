@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen
+   xmlns:android="http://schemas.android.com/apk/res/android">
+    <ListPreference
+      android:key="assetProviderPref"
+      android:title="Asset Provider"
+      android:summary="Choose your Asset Provider"
+      android:entries="@array/provider_names"
+      android:entryValues="@array/provider_values"
+      android:defaultValue="GRN"
+    />
+   
+</PreferenceScreen>

@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-
-    <string name="hello">Hello World, Cyberwire!</string>
-    <string name="app_name">Cyberwire</string>
-
+   <string name="hello">Hello World, Cyberwire!</string>
+   <string name="app_name">Cyberwire</string>
+   <string name="login_label">Login</string>
+   <string name="settings_label">Settings</string>
+   <string name="exit_label">Exit</string>
 </resources>
