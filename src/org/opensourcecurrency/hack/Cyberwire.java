@@ -76,7 +76,8 @@ public class Cyberwire extends Activity {
         	providerValues = provider.split(" ");
         	Log.d(TAG,"onOptionsItemSelected[login] host: " + providerValues[0]);
         	Log.d(TAG,"onOptionsItemSelected[login] clientid: " + providerValues[1]);
-    		intent.setData(Uri.parse(providerValues[0]+"/oauth/authorize?client_id="+providerValues[1]+"&response_type=code"));
+        	Log.d(TAG,"onOptionsItemSelected[login] redirect_uri: " + providerValues[3]);
+    		intent.setData(Uri.parse(providerValues[0]+"/oauth/authorize?client_id="+providerValues[1]+"&response_type=code&redirect_uri="+providerValues[3]));
     		startActivityForResult(intent,0);
     		return true;
     	case R.id.settings:
