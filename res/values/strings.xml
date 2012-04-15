@@ -9,4 +9,10 @@
    <string name="profile_desc">Profile</string>
    <string name="send_desc">Send</string>
    <string name="transactions_desc">Transactions</string>
+   
+   <string name="send_title">Make a payment</string>
+   <string name="to_field">to:</string>
+   <string name="amount_field">amount:</string>
+   <string name="note_field">note:</string>
+   <string name="pay_button">Pay now!</string>
 </resources>

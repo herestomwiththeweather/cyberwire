@@ -42,10 +42,10 @@ public class Cyberwire extends Activity implements OnClickListener {
     /** Called when the activity is first created. */
     @Override
     public void onCreate(Bundle savedInstanceState) {
-		SharedPreferences tokenStore;
-		tokenStore = getPreferences(Activity.MODE_PRIVATE);
-		String access_token = tokenStore.getString("access_token","none");
-		String expires_in = tokenStore.getString("expires_in","none");
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+
+		String access_token = prefs.getString("access_token","none");
+		String expires_in = prefs.getString("expires_in","none");
 
     	Log.d(TAG,"onCreate: " + expires_in + " : " + access_token);
     	
@@ -186,8 +186,8 @@ public class Cyberwire extends Activity implements OnClickListener {
     		Log.d(TAG,"response: "+response);
     		
     		try {
-    		  SharedPreferences tokenStore;
-    		  tokenStore = getPreferences(Activity.MODE_PRIVATE);
+              SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+
               JSONObject access_token_response = new JSONObject(response);
         	  String access_token = access_token_response.getString("access_token");
         	  String refresh_token = access_token_response.getString("refresh_token");
@@ -198,7 +198,7 @@ public class Cyberwire extends Activity implements OnClickListener {
         	  Log.d(TAG,"   expires_in: " + expires_in);
 
 
-              SharedPreferences.Editor editor = tokenStore.edit();
+              SharedPreferences.Editor editor = prefs.edit();
               editor.putString("access_token", access_token);
               editor.putString("refresh_token", refresh_token);
               editor.putString("expires_in", expires_in);
