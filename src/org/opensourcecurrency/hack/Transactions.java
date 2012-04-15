@@ -74,7 +74,7 @@ public class Transactions extends ListActivity {
     	    try {
           	    String to = transact.getString("to");
         	    String from = transact.getString("from");
-                if(emailAddress==to) {
+                if(emailAddress.equals(to)) {
                 	return from;
                 } else {
                 	return to;
@@ -83,6 +83,19 @@ public class Transactions extends ListActivity {
             	e.printStackTrace();    		    	    	
     	    }
     	    return "";
+    	}
+    	
+    	private Boolean isPayer(JSONObject transact, String emailAddress) {
+    		try {
+                if(emailAddress.equals(transact.getString("from"))) {
+                	return true;
+                } else {
+                	return false;
+                }
+    	    } catch (Exception e) {
+            	e.printStackTrace();    		    	    	
+    	    }
+    	    return false;    		
     	}
     	
     	@Override
@@ -102,7 +115,8 @@ public class Transactions extends ListActivity {
               for(int i=0;i<transactions_response.length();i++) {
             	  JSONObject transact = transactions_response.getJSONObject(i);
             	  String amount = transact.getString("amount");
-            	  items[i] = amount + " " + counterparty(transact,emailAddress);
+            	  String sign = isPayer(transact,emailAddress) ? "-" : "+";
+            	  items[i] = sign + amount + " " + counterparty(transact,emailAddress);
               }
               setListAdapter(new ArrayAdapter<String>(context,android.R.layout.simple_list_item_1,items));
     		  selection=(TextView)findViewById(R.id.selection);
