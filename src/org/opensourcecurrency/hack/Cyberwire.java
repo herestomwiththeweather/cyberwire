@@ -4,6 +4,9 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 
+import android.view.View;
+import android.view.View.OnClickListener;
+
 import org.apache.http.NameValuePair;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpPost;
@@ -31,7 +34,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.widget.Toast;
 
-public class Cyberwire extends Activity {
+public class Cyberwire extends Activity implements OnClickListener {
 	private static final String OAUTH_TOKEN_ACTION = "org.opensourcecurrency.hack.OAUTH_TOKEN";
 	private static final String TAG = "OpenTransact";
 	private ProgressDialog progress;
@@ -49,9 +52,34 @@ public class Cyberwire extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
         
+        View sendButton = findViewById(R.id.send_button);
+        sendButton.setOnClickListener(this);
+        View transactionsButton = findViewById(R.id.transactions_button);
+        transactionsButton.setOnClickListener(this);
+        View profileButton = findViewById(R.id.profile_button);
+        profileButton.setOnClickListener(this);
+        
 		Toast toast = Toast.makeText(this, "expires_in: " + expires_in + " : " + access_token, Toast.LENGTH_LONG);
 		toast.setGravity(Gravity.CENTER, 0, 0);
 		toast.show();
+    }
+    
+    @Override
+    public void onClick(View view) {
+    	switch (view.getId()) {
+    	case R.id.send_button:
+    		Intent i = new Intent(this, Send.class);
+    		startActivity(i);
+    		break;
+    	case R.id.transactions_button:
+    		Intent j = new Intent(this, Transactions.class);
+    		startActivity(j);
+    		break;
+    	case R.id.profile_button:
+    		Intent k = new Intent(this, Profile.class);
+    		startActivity(k);
+    		break;
+    	}
     }
     
     @Override

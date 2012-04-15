@@ -21,6 +21,12 @@
         <activity android:name=".Prefs"
             android:label="@string/settings_label"></activity>
         <activity
+            android:name=".Send"></activity>
+        <activity
+            android:name=".Transactions"></activity>
+        <activity
+            android:name=".Profile"></activity>
+        <activity
             android:name=".WebViewActivity"></activity>
     </application>
 
