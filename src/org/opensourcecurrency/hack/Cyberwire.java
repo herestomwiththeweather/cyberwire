@@ -187,23 +187,25 @@ public class Cyberwire extends Activity implements OnClickListener {
     		
     		try {
               SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+              SharedPreferences.Editor editor = prefs.edit();
 
               JSONObject access_token_response = new JSONObject(response);
         	  String access_token = access_token_response.getString("access_token");
+        	  Log.d(TAG," access token: " + access_token);
+              editor.putString("access_token", access_token);
+              editor.commit();
+
         	  String refresh_token = access_token_response.getString("refresh_token");
         	  String expires_in = access_token_response.getString("expires_in");
 
-        	  Log.d(TAG," access token: " + access_token);
         	  Log.d(TAG,"refresh token: " + refresh_token);
         	  Log.d(TAG,"   expires_in: " + expires_in);
 
 
-              SharedPreferences.Editor editor = prefs.edit();
-              editor.putString("access_token", access_token);
               editor.putString("refresh_token", refresh_token);
               editor.putString("expires_in", expires_in);
-
               editor.commit();
+
 
     		} catch (JSONException e) {
     		  e.printStackTrace();
