@@ -15,12 +15,10 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.opensourcecurrency.hack.RestTask;
 import org.opensourcecurrency.hack.WebViewActivity;
-import org.opensourcecurrency.hack.ProviderData;
 
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
-import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -36,67 +34,10 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.widget.Toast;
 
-import android.database.Cursor;
-import android.database.sqlite.SQLiteDatabase;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-
-import static android.provider.BaseColumns._ID;
-import static org.opensourcecurrency.hack.ConstantsProviders.PROVIDERS_TABLE_NAME;
-import static org.opensourcecurrency.hack.ConstantsProviders.NAME;
-import static org.opensourcecurrency.hack.ConstantsProviders.PROVIDER_URL;
-import static org.opensourcecurrency.hack.ConstantsProviders.REDIRECT_URL;
-import static org.opensourcecurrency.hack.ConstantsProviders.CLIENT_ID;
-import static org.opensourcecurrency.hack.ConstantsProviders.CLIENT_SECRET;
-import static org.opensourcecurrency.hack.ConstantsProviders.PROVIDER_CREATED_AT;
-
 public class Cyberwire extends Activity implements OnClickListener {
 	private static final String OAUTH_TOKEN_ACTION = "org.opensourcecurrency.hack.OAUTH_TOKEN";
 	private static final String TAG = "OpenTransact";
 	private ProgressDialog progress;
-	private ProviderData providers;
-	private static String[] FROM = { _ID, NAME,PROVIDER_URL,REDIRECT_URL,CLIENT_ID,CLIENT_SECRET,PROVIDER_CREATED_AT };
-	
-	private void addProvider(String name, String provider_url, String redirect_url, String client_id, String client_secret) {
-    	Log.d(TAG,"Cyberwire#addProvider: " + name);
-
-		SQLiteDatabase db = providers.getWritableDatabase();
-		ContentValues values = new ContentValues();
-		values.put(NAME, name);
-		values.put(PROVIDER_URL, provider_url);
-		values.put(REDIRECT_URL, redirect_url);
-		values.put(CLIENT_ID, client_id);
-		values.put(CLIENT_SECRET, client_secret);
-		SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-		values.put(PROVIDER_CREATED_AT, dateFormat.format(new Date()));
-		
-		values.put(PROVIDER_CREATED_AT, System.currentTimeMillis());
-		db.insertOrThrow(PROVIDERS_TABLE_NAME, null, values);
-	}
-	
-	private void getProviders() {
-    	Log.d(TAG,"Cyberwire#getProviders");
-		SQLiteDatabase db = providers.getReadableDatabase();
-		Cursor cursor = db.query(PROVIDERS_TABLE_NAME, FROM, null, null, null, null, null);
-		startManagingCursor(cursor);
-		while (cursor.moveToNext()) {
-			long id = cursor.getLong(0);
-			String name = cursor.getString(1);
-			String provider_url = cursor.getString(2);
-			String redirect_url = cursor.getString(3);
-			String client_id = cursor.getString(4);
-			String client_secret = cursor.getString(5);
-			long created_at = cursor.getLong(6);
-	    	Log.d(TAG,"Cyberwire#getProviders: " + id);
-	    	Log.d(TAG,"Cyberwire#getProviders: " + name);
-	    	Log.d(TAG,"Cyberwire#getProviders: " + provider_url);
-	    	Log.d(TAG,"Cyberwire#getProviders: " + redirect_url);
-	    	Log.d(TAG,"Cyberwire#getProviders: " + client_id);
-	    	Log.d(TAG,"Cyberwire#getProviders: " + client_secret);
-	    	Log.d(TAG,"Cyberwire#getProviders: " + created_at);
-
-		}
-	}
 	
     /** Called when the activity is first created. */
     @Override
@@ -107,14 +48,6 @@ public class Cyberwire extends Activity implements OnClickListener {
 		String expires_in = prefs.getString("expires_in","none");
 
     	Log.d(TAG,"onCreate: " + expires_in + " : " + access_token);
-    	// XXX
-    	providers = new ProviderData(this);
-    	try {
-    		//addProvider("ubuntu.local", "http://192.168.1.102:3000", "http://192.168.1.102:3000/transacts", "xBoHeeNNFt3LQ7U1tvAb8BVKr32duE6rdWtpCSFD", "HraYcLT5F5nRll5KF5tw8umdER3EOrsFXIEro67T");
-    		getProviders();
-    	} finally {
-    		providers.close();
-    	}
     	
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
