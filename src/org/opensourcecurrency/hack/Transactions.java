@@ -1,5 +1,6 @@
 package org.opensourcecurrency.hack;
 
+import static org.opensourcecurrency.hack.ConstantsProviders.PROVIDER_URL;
 import android.app.ProgressDialog;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
@@ -15,6 +16,8 @@ import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 import java.net.URI;
+import java.util.ArrayList;
+
 import org.apache.http.client.methods.HttpGet;
 
 import org.json.JSONException;
@@ -26,6 +29,7 @@ public class Transactions extends ListActivity {
 	TextView selection;
 	private static final String OAUTH_LISTPAYMENTS_ACTION = "org.opensourcecurrency.hack.OAUTH_LISTPAYMENTS";
 	private static final String TAG = "OpenTransact";
+	private ProviderData providers;
 	private ProgressDialog progress;
     
 	@Override
@@ -34,15 +38,16 @@ public class Transactions extends ListActivity {
 		setContentView(R.layout.transactions);
 		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
 		
-   		String provider = prefs.getString("assetProviderPref","");
 		String access_token = prefs.getString("access_token","none");
         Log.d(TAG,"access_token : " + access_token);
-       	String providerValues[];
-       	providerValues = provider.split(" ");
-    	final String asset_url = providerValues[4];
+
+		providers = new ProviderData(this);
+		Provider provider = providers.getProvider(prefs.getString("assetProviderPref",""));
+		
+		String asset_path="/transacts/hours";
     	
     	try {
-        	HttpGet transactionsRequest = new HttpGet(new URI(asset_url));
+        	HttpGet transactionsRequest = new HttpGet(new URI(provider.providerUrl + asset_path));
       		transactionsRequest.setHeader("Accept","application/json");
       		transactionsRequest.setHeader("Authorization","Bearer " + access_token);
         	RestTask task = new RestTask(this, OAUTH_LISTPAYMENTS_ACTION);
@@ -52,7 +57,7 @@ public class Transactions extends ListActivity {
         	e.printStackTrace();    		
     	}
 	}
-	
+    
 	public void onListItemClick(ListView parent, View v, int position, long id) {
 	 	//selection.setText(items[position]);
 	}

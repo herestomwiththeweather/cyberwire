@@ -34,6 +34,7 @@ public class Send extends Activity implements OnClickListener {
 	private static final String OAUTH_PAYMENT_ACTION = "org.opensourcecurrency.hack.OAUTH_PAYMENT";
 
 	private static final String TAG = "OpenTransact";
+	private ProviderData providers;
 	private ProgressDialog progress;
 
 	private EditText toText;
@@ -58,23 +59,25 @@ public class Send extends Activity implements OnClickListener {
     @Override
     public void onClick(View view) {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
-   		String provider = prefs.getString("assetProviderPref","");
+   		//String provider = prefs.getString("assetProviderPref","");
 		String access_token = prefs.getString("access_token","none");
         Log.d(TAG,"access_token : " + access_token);
-       	String providerValues[];
-       	providerValues = provider.split(" ");
-    	final String asset_url = providerValues[4];
+       	//String providerValues[];
+       	//providerValues = provider.split(" ");
+    	//final String asset_url = providerValues[4];
+    	
+		providers = new ProviderData(this);
+		Provider provider = providers.getProvider(prefs.getString("assetProviderPref",""));
+		String asset_path="/transacts/hours";
     
     	
     	switch (view.getId()) {
     	case R.id.pay_button:
-           	Log.d(TAG,"Send#onClick host: " + providerValues[0]);
-         	Log.d(TAG,"Send#onClick asset: " + asset_url);
             //Log.d(TAG,"onClick:     to=" + toText.getText().toString());
             //Log.d(TAG,"onClick: amount=" + amountText.getText().toString());
             //Log.d(TAG,"onClick:   note=" + noteText.getText().toString());        	
           	try {
-          		HttpPost paymentRequest = new HttpPost(new URI(asset_url));
+          		HttpPost paymentRequest = new HttpPost(new URI(provider.providerUrl+asset_path));
           		paymentRequest.setHeader("Accept","application/json");
           		paymentRequest.setHeader("Authorization","Bearer " + access_token);
         		List<NameValuePair> parameters = new ArrayList<NameValuePair>();
