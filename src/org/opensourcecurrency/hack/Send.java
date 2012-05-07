@@ -9,10 +9,12 @@ import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.view.Gravity;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.Toast;
 
 import java.net.URI;
 import java.util.ArrayList;
@@ -59,17 +61,21 @@ public class Send extends Activity implements OnClickListener {
     @Override
     public void onClick(View view) {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
-   		//String provider = prefs.getString("assetProviderPref","");
-		String access_token = prefs.getString("access_token","none");
-        Log.d(TAG,"access_token : " + access_token);
-       	//String providerValues[];
-       	//providerValues = provider.split(" ");
-    	//final String asset_url = providerValues[4];
     	
 		providers = new ProviderData(this);
 		Provider provider = providers.getProvider(prefs.getString("assetProviderPref",""));
+		
+		String access_token = provider.getAccessToken();
+        Log.d(TAG,"access_token : " + access_token);
+        
+        if(access_token.equals("")) {
+    		Toast toast = Toast.makeText(this, "No access token yet!", Toast.LENGTH_LONG);
+    		toast.setGravity(Gravity.CENTER, 0, 0);
+    		toast.show();
+        	return;
+        }
+        
 		String asset_path="/transacts/hours";
-    
     	
     	switch (view.getId()) {
     	case R.id.pay_button:

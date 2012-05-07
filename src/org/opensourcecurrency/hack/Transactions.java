@@ -17,6 +17,8 @@ import android.widget.ListView;
 import android.widget.TextView;
 import java.net.URI;
 import java.util.ArrayList;
+import android.view.Gravity;
+import android.widget.Toast;
 
 import org.apache.http.client.methods.HttpGet;
 
@@ -37,12 +39,19 @@ public class Transactions extends ListActivity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.transactions);
 		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
-		
-		String access_token = prefs.getString("access_token","none");
-        Log.d(TAG,"access_token : " + access_token);
 
 		providers = new ProviderData(this);
 		Provider provider = providers.getProvider(prefs.getString("assetProviderPref",""));
+		
+		String access_token = provider.getAccessToken();
+        Log.d(TAG,"access_token : " + access_token);
+        
+        if(access_token.equals("")) {
+    		Toast toast = Toast.makeText(this, "No access token yet!", Toast.LENGTH_LONG);
+    		toast.setGravity(Gravity.CENTER, 0, 0);
+    		toast.show();
+        	return;
+        }
 		
 		String asset_path="/transacts/hours";
     	

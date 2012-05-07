@@ -204,16 +204,21 @@ public class Cyberwire extends Activity implements OnClickListener {
     		}
     		String response = intent.getStringExtra(RestTask.HTTP_RESPONSE);
     		Log.d(TAG,"response: "+response);
+
+    		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+
+    		providers = new ProviderData(context);
+    		Provider provider = providers.getProvider(prefs.getString("assetProviderPref",""));
     		
     		try {
-              SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
-              SharedPreferences.Editor editor = prefs.edit();
+              //SharedPreferences.Editor editor = prefs.edit();
 
               JSONObject access_token_response = new JSONObject(response);
         	  String access_token = access_token_response.getString("access_token");
         	  Log.d(TAG," access token: " + access_token);
-              editor.putString("access_token", access_token);
-              editor.commit();
+        	  provider.addAccessToken(access_token, 0, "");
+              //editor.putString("access_token", access_token);
+              //editor.commit();
 
         	  String refresh_token = access_token_response.getString("refresh_token");
         	  String expires_in = access_token_response.getString("expires_in");
@@ -222,9 +227,9 @@ public class Cyberwire extends Activity implements OnClickListener {
         	  Log.d(TAG,"   expires_in: " + expires_in);
 
 
-              editor.putString("refresh_token", refresh_token);
-              editor.putString("expires_in", expires_in);
-              editor.commit();
+              //editor.putString("refresh_token", refresh_token);
+              //editor.putString("expires_in", expires_in);
+              //editor.commit();
 
 
     		} catch (JSONException e) {

@@ -34,12 +34,10 @@ import org.opensourcecurrency.hack.Provider;
 
 import android.content.ContentValues;
 import android.content.Context;
-import android.content.SharedPreferences;
 
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
-import android.preference.PreferenceManager;
 import android.util.Log;
 
 
@@ -49,6 +47,7 @@ public class ProviderData extends SQLiteOpenHelper {
 	private static final String TAG = "OpenTransact";
 
 	private static String[] FROM = { _ID, NAME,PROVIDER_URL,REDIRECT_URL,CLIENT_ID,CLIENT_SECRET,PROVIDER_CREATED_AT };
+	private static String[] TOKENS_FROM = { _ID, ACCESS_TOKEN_PROVIDER_ID,REFRESH_TOKEN_ID,ACCESS_TOKEN,ACCESS_TOKEN_EXPIRES_AT,ACCESS_TOKEN_CREATED_AT };
 
 	public ProviderData(Context ctx) {
 	      super(ctx, DATABASE_NAME, null, DATABASE_VERSION);
@@ -100,7 +99,8 @@ public class ProviderData extends SQLiteOpenHelper {
 	    while (cursor.moveToNext())
 	    {			
 	        try {
-	            Provider ob = new Provider();
+	            Provider ob = new Provider(this);
+	            ob.setId(cursor.getInt(cursor.getColumnIndex(_ID)));
 	            ob.setName(cursor.getString(cursor.getColumnIndex(NAME)));
 	            ob.setProviderUrl(cursor.getString(cursor.getColumnIndex(PROVIDER_URL)));
 	            ob.setRedirectUrl(cursor.getString(cursor.getColumnIndex(REDIRECT_URL)));
@@ -149,5 +149,71 @@ public class ProviderData extends SQLiteOpenHelper {
 		
 		//values.put(PROVIDER_CREATED_AT, System.currentTimeMillis());
 		db.insertOrThrow(PROVIDERS_TABLE_NAME, null, values);
+	}
+	
+	public ArrayList<AccessToken> getAccessTokens(String selection, String [] selectionArgs) {
+    	Log.d(TAG,"XXX ProviderData#getAccessTokens");
+		SQLiteDatabase db = getReadableDatabase();
+	    ArrayList<AccessToken> resultList = new ArrayList<AccessToken>();
+
+		Cursor cursor = db.query(ACCESS_TOKENS_TABLE_NAME, TOKENS_FROM, selection, selectionArgs, null, null, null);
+    	Log.d(TAG,"XXX ProviderData#getAccessTokens count: " + cursor.getCount());
+	    while (cursor.moveToNext())
+	    {			
+	        try {
+	            AccessToken ob = new AccessToken();
+	            ob.setId(cursor.getInt(cursor.getColumnIndex(_ID)));
+	            ob.setToken(cursor.getString(cursor.getColumnIndex(ACCESS_TOKEN)));
+	            resultList.add(ob);
+	        } catch (Exception e) {
+      			e.printStackTrace();
+	        }
+	    }
+
+	    cursor.close();
+	    db.close();
+	    
+	    return resultList;
+	}
+	
+    public AccessToken getAccessToken(Integer provider_id) {
+		Log.d(TAG,"XXX getAccessToken: " + provider_id);
+		
+		AccessToken access_token;
+		ArrayList<AccessToken> access_tokens;
+		
+    	try {
+    		access_tokens = getAccessTokens(ACCESS_TOKEN_PROVIDER_ID + " = ?", new String[] {provider_id.toString()});
+    	} finally {
+    		close();
+    	}
+    	if(0 == access_tokens.size()) {
+    		access_token = null;
+    	} else {
+    		access_token = access_tokens.get(0);
+    	}
+    	return access_token;
+    }
+    
+	public void addAccessToken(Integer provider_id, String access_token, Integer expires_in, Integer refresh_token_id) {
+		Log.d(TAG,"ProviderData#addAccessToken  provider_id: " + provider_id);
+		Log.d(TAG,"ProviderData#addAccessToken access_token: " + access_token);
+		
+		SQLiteDatabase db = getWritableDatabase();
+		ContentValues values = new ContentValues();
+
+		values.put(ACCESS_TOKEN_PROVIDER_ID, provider_id);
+		values.put(REFRESH_TOKEN_ID, refresh_token_id);
+		values.put(ACCESS_TOKEN, access_token);
+		
+		Date now = new Date();
+		SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+		values.put(ACCESS_TOKEN_CREATED_AT, dateFormat.format(now));
+		
+		SimpleDateFormat expires_at_dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+		values.put(ACCESS_TOKEN_EXPIRES_AT, expires_at_dateFormat.format(new Date(now.getTime()+(expires_in*1000))));
+		
+		//values.put(PROVIDER_CREATED_AT, System.currentTimeMillis());
+		db.insertOrThrow(ACCESS_TOKENS_TABLE_NAME, null, values);
 	}
 }

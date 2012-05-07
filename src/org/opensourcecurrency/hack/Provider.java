@@ -1,11 +1,22 @@
 package org.opensourcecurrency.hack;
 
 public class Provider {
+	public Integer providerId;
 	public String providerName;
 	public String providerUrl;
 	public String redirectUrl;
 	public String clientId;
 	public String clientSecret;
+	
+	private ProviderData m_providers;
+	
+	public Provider(ProviderData providers) {
+		m_providers = providers;
+	}
+	
+	public void setId(Integer id) {
+		providerId = id;
+	}
 	
 	public void setName(String name) {
 		providerName = name;
@@ -26,5 +37,20 @@ public class Provider {
 	public void setClientSecret(String client_secret) {
 		clientSecret = client_secret;
 	}
+	
+	public void addAccessToken(String token, Integer expires_in, String refresh_token) {
+		// XXX right now, passing null for refresh token id
+		m_providers.addAccessToken(providerId,token,expires_in,null);
+	}
 
+	public String getAccessToken() {
+		// get first unexpired access token associated with this provider
+		AccessToken token;
+		token = m_providers.getAccessToken(providerId);
+		if(null==token) {
+			return "";
+		} else {
+			return token.token;
+		}
+	}
 }
