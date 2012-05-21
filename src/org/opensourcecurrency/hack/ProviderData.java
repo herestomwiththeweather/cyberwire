@@ -60,7 +60,7 @@ public class ProviderData extends SQLiteOpenHelper {
 	      db.execSQL("CREATE TABLE " + PROVIDERS_TABLE_NAME + " (" + _ID
 	              + " INTEGER PRIMARY KEY AUTOINCREMENT, " + NAME 
 	              + " TEXT NOT NULL, " + PROVIDER_URL
-	              + " TEXT NOT NULL, " + REDIRECT_URL
+	              + " TEXT UNIQUE NOT NULL, " + REDIRECT_URL
 	              + " TEXT NOT NULL, " + CLIENT_ID
 	              + " TEXT NOT NULL, " + CLIENT_SECRET
 	              + " TEXT NOT NULL," + PROVIDER_CREATED_AT + " DATE);");

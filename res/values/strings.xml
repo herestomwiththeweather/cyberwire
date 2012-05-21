@@ -2,6 +2,7 @@
 <resources>
    <string name="hello">Hello World, Cyberwire!</string>
    <string name="app_name">Cyberwire</string>
+   <string name="addprovider_label">Add Provider</string>
    <string name="login_label">Login</string>
    <string name="settings_label">Settings</string>
    <string name="exit_label">Exit</string>
@@ -15,4 +16,8 @@
    <string name="amount_field">amount:</string>
    <string name="note_field">note:</string>
    <string name="pay_button">Pay now!</string>
+   
+   <string name="add_provider_title">Add Asset Provider</string>
+   <string name="provider_url_field">url:</string>
+   <string name="add_provider_button">Add</string>
 </resources>

@@ -43,22 +43,14 @@ public class Cyberwire extends Activity implements OnClickListener {
 	private static final String OAUTH_TOKEN_ACTION = "org.opensourcecurrency.hack.OAUTH_TOKEN";
 	private static final String TAG = "OpenTransact";
 	private ProviderData providers;
-//private ProviderData providers2;
 
 	private ProgressDialog progress;
 	
     /** Called when the activity is first created. */
     @Override
     public void onCreate(Bundle savedInstanceState) {
-        //SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
 
-		//String access_token = prefs.getString("access_token","none");
-		//String expires_in = prefs.getString("expires_in","none");
-//providers2=new ProviderData(this);
-    	//Log.d(TAG,"onCreate: " + expires_in + " : " + access_token);
-//providers2.addProvider("demo", "http://demo.opensourcecurrency.org", "http://demo.opensourcecurrency.org/transacts", "xBoHeeNNFt3LQ7U1tvAb8BVKr32duE6rdWtpCSFD", "HraYcLT5F5nRll5KF5tw8umdER3EOrsFXIEro67T");
-
-    	
+    	//this.deleteDatabase("providers.db");
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
         
@@ -69,9 +61,6 @@ public class Cyberwire extends Activity implements OnClickListener {
         View profileButton = findViewById(R.id.profile_button);
         profileButton.setOnClickListener(this);
         
-		//Toast toast = Toast.makeText(this, "expires_in: " + expires_in + " : " + access_token, Toast.LENGTH_LONG);
-		//toast.setGravity(Gravity.CENTER, 0, 0);
-		//toast.show();
     }
     
     @Override
@@ -102,9 +91,13 @@ public class Cyberwire extends Activity implements OnClickListener {
     
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-    	//String providerValues[];
     	Log.d(TAG,"onOptionsItemSelected");
     	switch (item.getItemId()) {
+    	case R.id.addprovider:
+        	Log.d(TAG,"onOptionsItemSelected[addprovider]");
+    		Intent i = new Intent(this, AddProvider.class);
+    		startActivity(i);
+    		return true;
     	case R.id.exit:
     		return true;
     	case R.id.login:
@@ -114,7 +107,8 @@ public class Cyberwire extends Activity implements OnClickListener {
 
     		providers = new ProviderData(this);
     		Provider provider = providers.getProvider(prefs.getString("assetProviderPref",""));
-			
+    		
+        	Log.d(TAG,"onOptionsItemSelected[login] provider_name: " + provider.providerName);
         	Log.d(TAG,"onOptionsItemSelected[login] provider_url: " + provider.providerUrl);
         	Log.d(TAG,"onOptionsItemSelected[login] clientid: " + provider.clientId);
         	Log.d(TAG,"onOptionsItemSelected[login] redirect_uri: " + provider.redirectUrl);

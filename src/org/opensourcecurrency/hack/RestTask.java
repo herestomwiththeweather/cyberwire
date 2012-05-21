@@ -9,11 +9,12 @@ import org.apache.http.impl.client.DefaultHttpClient;
 import android.content.Context;
 import android.content.Intent;
 import android.os.AsyncTask;
+import android.util.Log;
 
 public class RestTask extends AsyncTask<HttpUriRequest, Void, String> {
 
     public static final String HTTP_RESPONSE = "httpResponse";
-	
+
     private Context mContext;
     private HttpClient mClient;
     private String mAction;
@@ -47,6 +48,7 @@ public class RestTask extends AsyncTask<HttpUriRequest, Void, String> {
 	
     @Override
     protected void onPostExecute(String result) {
+
         Intent intent = new Intent(mAction);
         intent.putExtra(HTTP_RESPONSE, result);
         //Broadcast the completion

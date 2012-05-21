@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:background="@color/background"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:orientation="vertical"
+    android:gravity="center"
+    android:padding="10dip">
+   <TextView
+      android:text="@string/add_provider_title"
+      android:layout_height="wrap_content"
+      android:layout_width="wrap_content"
+      android:layout_marginBottom="20dip"
+      android:textSize="24.5sp" />
+   <LinearLayout android:layout_width="fill_parent"
+      android:layout_height="wrap_content">
+      <TextView android:layout_width="70dip"
+         android:layout_height="wrap_content"
+         android:layout_marginRight="10dip"
+         android:text="@string/provider_url_field"
+         android:textColor="#444444"
+         android:textSize="15sp"
+         android:textStyle="bold"/>
+      <EditText
+         android:id="@+id/add_provider_field"
+         android:layout_width="0dip"
+         android:layout_height="wrap_content"
+         android:layout_weight="1.0"
+         android:lines="1"
+         android:inputType="textUri"
+         android:imeOptions="actionGo" />
+   </LinearLayout>
+      <Button
+         android:id="@+id/add_provider_button"
+         android:layout_width="wrap_content"
+         android:layout_height="wrap_content"
+         android:text="@string/add_provider_button" />
+</LinearLayout>

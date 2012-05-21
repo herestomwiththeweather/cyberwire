@@ -28,6 +28,8 @@
             android:name=".Profile"></activity>
         <activity
             android:name=".WebViewActivity"></activity>
+        <activity
+            android:name=".AddProvider"></activity>
     </application>
 
 </manifest>

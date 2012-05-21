@@ -39,8 +39,10 @@ public class Prefs extends PreferenceActivity {
 	        // Root
 	        PreferenceScreen root = getPreferenceManager().createPreferenceScreen(this);
 	        Cursor cursor;
+	        Integer [] provider_ids;
 	        String [] provider_names;
 	        String [] provider_urls;
+	        String [] provider_client_ids;
 	        
 			providers = new ProviderData(this);
 			ArrayList<Provider> assetProviders;
@@ -55,17 +57,24 @@ public class Prefs extends PreferenceActivity {
 
 	    	int count = assetProviders.size();
 	    	Log.d(TAG, "XXX createPreferenceHierarchy size: " + count);
+	    	provider_ids = new Integer[count];
 	    	provider_names = new String[count];
 	    	provider_urls = new String[count];
+	    	provider_client_ids = new String[count];
+	    	
 	    	int i = 0;
 	    	
 			while (i < assetProviders.size()) {
 				Provider p = assetProviders.get(i);
+				provider_ids[i] = p.providerId;
 				provider_names[i] = p.providerName;
 				provider_urls[i] = p.providerUrl;
+				provider_client_ids[i] = p.clientId;
 
+		    	Log.d(TAG, "[" + i + "]" + "Prefs  provider id: " + provider_ids[i]);
 		    	Log.d(TAG, "[" + i + "]" + "Prefs  provider name: " + provider_names[i]);
 		    	Log.d(TAG, "[" + i + "]" + "Prefs  provider url: " + provider_urls[i]);
+		    	Log.d(TAG, "[" + i + "]" + "Prefs  provider clientid: " + provider_client_ids[i]);
 
 		    	i++;
 			}
