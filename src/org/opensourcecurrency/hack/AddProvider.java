@@ -21,10 +21,12 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
+import android.view.Gravity;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.Toast;
 
 import java.io.StringReader;
 import org.w3c.dom.*;
@@ -103,6 +105,10 @@ public class AddProvider extends Activity implements OnClickListener {
     		String response = intent.getStringExtra(RestTask.HTTP_RESPONSE);
     		Log.d(TAG,"getClientRegistrationEndpoint() response(host-meta): "+response);
     		
+    		if(null == response) {
+    			return "";
+    		}
+    		
     		DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
     		DocumentBuilder db = null;
     		try {
@@ -179,9 +185,14 @@ public class AddProvider extends Activity implements OnClickListener {
     		
     		if(intent.getAction().equals(DYNREG_HOSTMETA_ACTION)) {
     			m_dynreg_endpoint = getClientRegistrationEndpoint(intent);
+    			if(m_dynreg_endpoint.equals("")) {
+    	    		Toast toast = Toast.makeText(context, "Error connecting with provider", Toast.LENGTH_LONG);
+    	    		toast.setGravity(Gravity.CENTER, 0, 0);
+    	    		toast.show();
+    	    		return;
+    			}
     			registerOAuthClient(m_dynreg_endpoint, context);
     		} else if(intent.getAction().equals(DYNREG_REGISTER_ACTION)) {
-        		Log.d(TAG,"XXX done!!!");
         		createNewProvider(context,intent);
     		} else {
         		Log.d(TAG,"XXX unrecognized action for AddProvider");

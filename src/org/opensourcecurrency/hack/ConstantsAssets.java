@@ -7,5 +7,6 @@ public interface ConstantsAssets extends BaseColumns {
 	// columns in the assets table
 	public static final String ASSET_PROVIDER_ID = "provider_id";
 	public static final String ASSET_URL = "url";
+	public static final String ASSET_NAME = "name";
 	public static final String ASSET_CREATED_AT = "created_at";
 }

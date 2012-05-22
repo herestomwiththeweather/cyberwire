@@ -16,6 +16,7 @@ import java.util.ArrayList;
 import static org.opensourcecurrency.hack.ConstantsAssets.ASSETS_TABLE_NAME;
 import static org.opensourcecurrency.hack.ConstantsAssets.ASSET_PROVIDER_ID;
 import static org.opensourcecurrency.hack.ConstantsAssets.ASSET_URL;
+import static org.opensourcecurrency.hack.ConstantsAssets.ASSET_NAME;
 import static org.opensourcecurrency.hack.ConstantsAssets.ASSET_CREATED_AT;
 
 import static org.opensourcecurrency.hack.ConstantsAccessTokens.ACCESS_TOKENS_TABLE_NAME;
@@ -48,7 +49,8 @@ public class ProviderData extends SQLiteOpenHelper {
 
 	private static String[] FROM = { _ID, NAME,PROVIDER_URL,REDIRECT_URL,CLIENT_ID,CLIENT_SECRET,PROVIDER_CREATED_AT };
 	private static String[] TOKENS_FROM = { _ID, ACCESS_TOKEN_PROVIDER_ID,REFRESH_TOKEN_ID,ACCESS_TOKEN,ACCESS_TOKEN_EXPIRES_AT,ACCESS_TOKEN_CREATED_AT };
-
+    private static String[] ASSETS_FROM = { _ID, ASSET_PROVIDER_ID, ASSET_URL, ASSET_NAME, ASSET_CREATED_AT };
+    
 	public ProviderData(Context ctx) {
 	      super(ctx, DATABASE_NAME, null, DATABASE_VERSION);
 	}
@@ -68,6 +70,7 @@ public class ProviderData extends SQLiteOpenHelper {
 	      db.execSQL("CREATE TABLE " + ASSETS_TABLE_NAME + " (" + _ID
 	              + " INTEGER PRIMARY KEY AUTOINCREMENT, " + ASSET_PROVIDER_ID 
 	              + " INTEGER, " + ASSET_URL
+	              + " TEXT UNIQUE NOT NULL," + ASSET_NAME
 	              + " TEXT NOT NULL," + ASSET_CREATED_AT + " DATE);");
 	      
 	      db.execSQL("CREATE TABLE " + ACCESS_TOKENS_TABLE_NAME + " (" + _ID
@@ -216,4 +219,48 @@ public class ProviderData extends SQLiteOpenHelper {
 		//values.put(PROVIDER_CREATED_AT, System.currentTimeMillis());
 		db.insertOrThrow(ACCESS_TOKENS_TABLE_NAME, null, values);
 	}
+	
+	public ArrayList<Asset> getAssets(String selection, String [] selectionArgs) {
+    	Log.d(TAG,"XXX ProviderData#getAssets");
+		SQLiteDatabase db = getReadableDatabase();
+	    ArrayList<Asset> resultList = new ArrayList<Asset>();
+
+		Cursor cursor = db.query(ASSETS_TABLE_NAME, ASSETS_FROM, selection, selectionArgs, null, null, null);
+    	Log.d(TAG,"XXX ProviderData#getAssets count: " + cursor.getCount());
+	    while (cursor.moveToNext())
+	    {			
+	        try {
+	            Asset ob = new Asset();
+	            ob.setId(cursor.getInt(cursor.getColumnIndex(_ID)));
+	            ob.setUrl(cursor.getString(cursor.getColumnIndex(ASSET_URL)));
+	            ob.setName(cursor.getString(cursor.getColumnIndex(ASSET_NAME)));
+	            resultList.add(ob);
+	        } catch (Exception e) {
+      			e.printStackTrace();
+	        }
+	    }
+
+	    cursor.close();
+	    db.close();
+	    
+	    return resultList;
+	}
+
+    public void addAsset(Integer provider_id, String name, String url) {
+		Log.d(TAG,"ProviderData#addAsset name: " + name);
+		Log.d(TAG,"ProviderData#addAsset  url: " + url);
+		
+		SQLiteDatabase db = getWritableDatabase();
+		ContentValues values = new ContentValues();
+		
+		values.put(ASSET_PROVIDER_ID, provider_id);
+		values.put(ASSET_NAME, name);
+		values.put(ASSET_URL, url);
+		
+		Date now = new Date();
+		SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+		values.put(ASSET_CREATED_AT, dateFormat.format(now));
+		
+		db.insertOrThrow(ASSETS_TABLE_NAME, null, values);
+    }
 }

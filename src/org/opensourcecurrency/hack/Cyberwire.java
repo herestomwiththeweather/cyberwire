@@ -9,8 +9,10 @@ import android.view.View.OnClickListener;
 
 import org.apache.http.NameValuePair;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.message.BasicNameValuePair;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.opensourcecurrency.hack.RestTask;
@@ -34,6 +36,8 @@ import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.widget.ArrayAdapter;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import static org.opensourcecurrency.hack.ConstantsProviders.PROVIDER_URL;
@@ -41,6 +45,7 @@ import static org.opensourcecurrency.hack.ConstantsProviders.PROVIDER_URL;
 
 public class Cyberwire extends Activity implements OnClickListener {
 	private static final String OAUTH_TOKEN_ACTION = "org.opensourcecurrency.hack.OAUTH_TOKEN";
+	private static final String WALLET_ACTION = "org.opensourcecurrency.hack.WALLET";
 	private static final String TAG = "OpenTransact";
 	private ProviderData providers;
 
@@ -51,6 +56,15 @@ public class Cyberwire extends Activity implements OnClickListener {
     public void onCreate(Bundle savedInstanceState) {
 
     	//this.deleteDatabase("providers.db");
+		// XXX
+		//ArrayList<Asset> assets = provider.getAssets();
+    	//int n=0;
+    	//while(n < assets.size()) {
+		//	Asset a = assets.get(n);
+		//	Log.d(TAG, a.name + ": " + a.url);
+    	//	n++;
+    	//}
+    	
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
         
@@ -181,12 +195,79 @@ public class Cyberwire extends Activity implements OnClickListener {
     public void onResume() {
       super.onResume();
       registerReceiver(receiver, new IntentFilter(OAUTH_TOKEN_ACTION));
+      registerReceiver(receiver, new IntentFilter(WALLET_ACTION));
     }
     
     @Override
     public void onPause() {
     	super.onPause();
     	unregisterReceiver(receiver);
+    }
+    
+    String addAccessToken(Context context, Intent intent, Provider provider) {
+		String response = intent.getStringExtra(RestTask.HTTP_RESPONSE);
+		Log.d(TAG,"response: "+response);
+		
+		String access_token = null;
+		
+		if(null == response) {
+			return "";
+		}
+
+		try {
+          JSONObject access_token_response = new JSONObject(response);
+      	  access_token = access_token_response.getString("access_token");
+      	  Log.d(TAG," access token: " + access_token);
+      	  provider.addAccessToken(access_token, 0, "");
+
+      	  //String refresh_token = access_token_response.getString("refresh_token");
+      	  //String expires_in = access_token_response.getString("expires_in");
+
+      	  //Log.d(TAG,"refresh token: " + refresh_token);
+      	  //Log.d(TAG,"   expires_in: " + expires_in);
+
+
+  		} catch (JSONException e) {
+  		  e.printStackTrace();
+  		  return "";
+  		}
+		
+    	return access_token;
+    }
+    
+    private void getWallet(Context context, String access_token, Provider provider) {
+    	String wallet_path = "/wallet";
+    	
+       	try {
+        	HttpGet walletRequest = new HttpGet(new URI(provider.providerUrl + wallet_path));
+      		walletRequest.setHeader("Accept","application/json");
+      		walletRequest.setHeader("Authorization","Bearer " + access_token);
+        	RestTask task = new RestTask(this, WALLET_ACTION);
+        	task.execute(walletRequest);
+        	progress = ProgressDialog.show(this, "Fetching wallet", "Waiting...", true);
+    	} catch(Exception e) {
+        	e.printStackTrace();    		
+    	}
+    }
+    
+    boolean addAssets(Intent intent, Provider provider) {
+		String response = intent.getStringExtra(RestTask.HTTP_RESPONSE);
+		Log.d(TAG,"response: "+response);
+		try {
+	          JSONObject wallet_response = new JSONObject(response);
+	      	  Integer total = wallet_response.getInt("total");
+	      	  Log.d(TAG,"wallet total: " + total);
+	      	  JSONArray assets = wallet_response.getJSONArray("assets");
+	      	  for(int i=0;i<assets.length();i++) {
+	      		  JSONObject asset = assets.getJSONObject(i);
+	      		  provider.addAsset(asset.getString("name"), asset.getString("url"));
+	      	  }
+  		} catch (JSONException e) {
+  		  e.printStackTrace();
+  		  return false;
+  		}
+		
+		return true;
     }
     
     private BroadcastReceiver receiver = new BroadcastReceiver() {
@@ -196,40 +277,24 @@ public class Cyberwire extends Activity implements OnClickListener {
     		if(progress != null) {
     			progress.dismiss();
     		}
-    		String response = intent.getStringExtra(RestTask.HTTP_RESPONSE);
-    		Log.d(TAG,"response: "+response);
-
     		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
 
     		providers = new ProviderData(context);
     		Provider provider = providers.getProvider(prefs.getString("assetProviderPref",""));
     		
-    		try {
-              //SharedPreferences.Editor editor = prefs.edit();
-
-              JSONObject access_token_response = new JSONObject(response);
-        	  String access_token = access_token_response.getString("access_token");
-        	  Log.d(TAG," access token: " + access_token);
-        	  provider.addAccessToken(access_token, 0, "");
-              //editor.putString("access_token", access_token);
-              //editor.commit();
-
-        	  String refresh_token = access_token_response.getString("refresh_token");
-        	  String expires_in = access_token_response.getString("expires_in");
-
-        	  Log.d(TAG,"refresh token: " + refresh_token);
-        	  Log.d(TAG,"   expires_in: " + expires_in);
-
-
-              //editor.putString("refresh_token", refresh_token);
-              //editor.putString("expires_in", expires_in);
-              //editor.commit();
-
-
-    		} catch (JSONException e) {
-    		  e.printStackTrace();
+    		if(intent.getAction().equals(OAUTH_TOKEN_ACTION)) {
+    			String token = null;
+    			token = addAccessToken(context,intent,provider);
+    			if(token.equals("")) {
+    				Log.d(TAG,"addAccessToken failed!");
+    			} else {
+    				getWallet(context,token,provider);
+    			}
+    		} else if (intent.getAction().equals(WALLET_ACTION)) {
+    			// XXX add assets from wallet
+    			Log.d(TAG,"onReceive WALLET!!!");
+    			addAssets(intent,provider);
     		}
-
     	}
     };
 }

@@ -1,5 +1,9 @@
 package org.opensourcecurrency.hack;
 
+import static org.opensourcecurrency.hack.ConstantsAssets.ASSET_PROVIDER_ID;
+
+import java.util.ArrayList;
+
 public class Provider {
 	public Integer providerId;
 	public String providerName;
@@ -41,6 +45,22 @@ public class Provider {
 	public void addAccessToken(String token, Integer expires_in, String refresh_token) {
 		// XXX right now, passing null for refresh token id
 		m_providers.addAccessToken(providerId,token,expires_in,null);
+	}
+	
+	public void addAsset(String name, String url) {
+		m_providers.addAsset(providerId,name,url);
+	}
+	
+	public ArrayList<Asset> getAssets() {
+		ArrayList<Asset> assets;
+		
+    	try {
+    		assets = m_providers.getAssets(ASSET_PROVIDER_ID + " = ?", new String[] {providerId.toString()});
+    	} finally {
+    		m_providers.close();
+    	}
+    	
+    	return assets;
 	}
 
 	public String getAccessToken() {
