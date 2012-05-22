@@ -59,11 +59,9 @@ public class Send extends Activity implements OnClickListener {
     }
     
     @Override
-    public void onClick(View view) {
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
-    	
+    public void onClick(View view) {    	
 		providers = new ProviderData(this);
-		Provider provider = providers.getProvider(prefs.getString("assetProviderPref",""));
+		Provider provider = providers.getCurrentProvider(this);
 		
 		String access_token = provider.getAccessToken();
         Log.d(TAG,"access_token : " + access_token);

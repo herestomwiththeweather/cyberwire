@@ -35,10 +35,12 @@ import org.opensourcecurrency.hack.Provider;
 
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.SharedPreferences;
 
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.preference.PreferenceManager;
 import android.util.Log;
 
 
@@ -119,6 +121,12 @@ public class ProviderData extends SQLiteOpenHelper {
 	    db.close();
 	    
 	    return resultList;
+	}
+	
+	public Provider getCurrentProvider(Context context) {
+		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+
+		return getProvider(prefs.getString("assetProviderPref",""));
 	}
 	
     public Provider getProvider(String providername) {

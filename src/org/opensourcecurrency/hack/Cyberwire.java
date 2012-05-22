@@ -117,10 +117,8 @@ public class Cyberwire extends Activity implements OnClickListener {
     	case R.id.login:
     		Intent intent = new Intent(this,WebViewActivity.class);
     		
-    		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
-
     		providers = new ProviderData(this);
-    		Provider provider = providers.getProvider(prefs.getString("assetProviderPref",""));
+    		Provider provider = providers.getCurrentProvider(this);
     		
         	Log.d(TAG,"onOptionsItemSelected[login] provider_name: " + provider.providerName);
         	Log.d(TAG,"onOptionsItemSelected[login] provider_url: " + provider.providerUrl);
@@ -153,10 +151,8 @@ public class Cyberwire extends Activity implements OnClickListener {
     		toast.setGravity(Gravity.CENTER, 0, 0);
     		toast.show();
 
-    		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
-
     		providers = new ProviderData(this);
-    		Provider provider = providers.getProvider(prefs.getString("assetProviderPref",""));
+    		Provider provider = providers.getCurrentProvider(this);
  
 	    	String provider_url = provider.providerUrl;
 			String redirect_url = provider.redirectUrl;
@@ -277,11 +273,10 @@ public class Cyberwire extends Activity implements OnClickListener {
     		if(progress != null) {
     			progress.dismiss();
     		}
-    		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
 
     		providers = new ProviderData(context);
-    		Provider provider = providers.getProvider(prefs.getString("assetProviderPref",""));
-    		
+    		Provider provider = providers.getCurrentProvider(context);
+
     		if(intent.getAction().equals(OAUTH_TOKEN_ACTION)) {
     			String token = null;
     			token = addAccessToken(context,intent,provider);

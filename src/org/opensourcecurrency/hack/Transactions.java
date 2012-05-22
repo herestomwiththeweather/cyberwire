@@ -38,10 +38,10 @@ public class Transactions extends ListActivity {
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.transactions);
-		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
 
 		providers = new ProviderData(this);
-		Provider provider = providers.getProvider(prefs.getString("assetProviderPref",""));
+		Provider provider = providers.getCurrentProvider(this);
+
 		
 		String access_token = provider.getAccessToken();
         Log.d(TAG,"access_token : " + access_token);
