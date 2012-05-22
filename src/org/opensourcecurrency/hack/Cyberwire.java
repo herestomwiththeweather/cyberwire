@@ -56,14 +56,6 @@ public class Cyberwire extends Activity implements OnClickListener {
     public void onCreate(Bundle savedInstanceState) {
 
     	//this.deleteDatabase("providers.db");
-		// XXX
-		//ArrayList<Asset> assets = provider.getAssets();
-    	//int n=0;
-    	//while(n < assets.size()) {
-		//	Asset a = assets.get(n);
-		//	Log.d(TAG, a.name + ": " + a.url);
-    	//	n++;
-    	//}
     	
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);

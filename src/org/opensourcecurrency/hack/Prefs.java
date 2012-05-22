@@ -16,6 +16,7 @@ import android.preference.ListPreference;
 import android.util.Log;
 
 import static android.provider.BaseColumns._ID;
+import static org.opensourcecurrency.hack.ConstantsAssets.ASSET_PROVIDER_ID;
 import static org.opensourcecurrency.hack.ConstantsProviders.PROVIDERS_TABLE_NAME;
 import static org.opensourcecurrency.hack.ConstantsProviders.NAME;
 import static org.opensourcecurrency.hack.ConstantsProviders.PROVIDER_URL;
@@ -39,42 +40,35 @@ public class Prefs extends PreferenceActivity {
 	        // Root
 	        PreferenceScreen root = getPreferenceManager().createPreferenceScreen(this);
 	        Cursor cursor;
-	        Integer [] provider_ids;
-	        String [] provider_names;
-	        String [] provider_urls;
-	        String [] provider_client_ids;
+
+	        String [] asset_urls;
+	        String [] asset_names;
 	        
 			providers = new ProviderData(this);
-			ArrayList<Provider> assetProviders;
-			
+			ArrayList<Asset> assets;
 	    	try {
-	    		assetProviders = providers.getProviders("",new String [] {});
+	    		assets = providers.getAssets("", new String[] {});
 	    	} finally {
 	    		providers.close();
 	    	}
 	
 	    	Log.d(TAG, "XXX -----------------------------------------------------------");
 
-	    	int count = assetProviders.size();
+	    	int count = assets.size();
 	    	Log.d(TAG, "XXX createPreferenceHierarchy size: " + count);
-	    	provider_ids = new Integer[count];
-	    	provider_names = new String[count];
-	    	provider_urls = new String[count];
-	    	provider_client_ids = new String[count];
+
+	    	asset_names = new String[count];
+	    	asset_urls = new String[count];
 	    	
 	    	int i = 0;
 	    	
-			while (i < assetProviders.size()) {
-				Provider p = assetProviders.get(i);
-				provider_ids[i] = p.providerId;
-				provider_names[i] = p.providerName;
-				provider_urls[i] = p.providerUrl;
-				provider_client_ids[i] = p.clientId;
+			while (i < count) {
+				Asset a = assets.get(i);
+				asset_names[i] = a.name;
+				asset_urls[i] = a.url;
 
-		    	Log.d(TAG, "[" + i + "]" + "Prefs  provider id: " + provider_ids[i]);
-		    	Log.d(TAG, "[" + i + "]" + "Prefs  provider name: " + provider_names[i]);
-		    	Log.d(TAG, "[" + i + "]" + "Prefs  provider url: " + provider_urls[i]);
-		    	Log.d(TAG, "[" + i + "]" + "Prefs  provider clientid: " + provider_client_ids[i]);
+		    	Log.d(TAG, "[" + i + "]" + "Prefs  asset name: " + asset_names[i]);
+		    	Log.d(TAG, "[" + i + "]" + "Prefs  asset url: " + asset_urls[i]);
 
 		    	i++;
 			}
@@ -86,12 +80,13 @@ public class Prefs extends PreferenceActivity {
 
 	        // List preference
 	        ListPreference listPref = new ListPreference(this);
-	        listPref.setEntries(provider_names);
-	        listPref.setEntryValues(provider_urls);
-	        listPref.setDialogTitle("OpenTransact Provider");
+
+	        listPref.setEntries(asset_names);
+	        listPref.setEntryValues(asset_urls);
+	        listPref.setDialogTitle("OpenTransact Asset");
 	        listPref.setKey("assetProviderPref");
-	        listPref.setTitle("Asset Provider");
-	        listPref.setSummary("Choose your Asset Provider");
+	        listPref.setTitle("Asset");
+	        listPref.setSummary("Choose your Asset");
 	        dialogBasedPrefCat.addPreference(listPref);
 
 	        return root;
