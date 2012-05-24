@@ -123,11 +123,28 @@ public class ProviderData extends SQLiteOpenHelper {
 	    return resultList;
 	}
 	
-	public Provider getCurrentProvider(Context context) {
+	public Asset getCurrentAsset(Context context) {
 		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
 
-		return getProvider(prefs.getString("assetProviderPref",""));
+		return getAsset(prefs.getString("assetProviderPref",""));
 	}
+	
+    public Asset getAsset(String asset_url) {
+		Log.d(TAG,"XXX getAsset: " + asset_url);
+		
+		Asset asset;
+		ArrayList<Asset> assets;
+		
+    	try {
+    		assets = getAssets(ASSET_URL + " = ?", new String[] {asset_url});
+    	} finally {
+    		close();
+    	}
+    	
+    	asset = assets.get(0);
+    	asset.setProvider(getProviderById(asset.m_providerId));
+    	return asset;
+    }
 	
     public Provider getProvider(String providername) {
 		Log.d(TAG,"XXX getProvider: " + providername);
@@ -145,7 +162,23 @@ public class ProviderData extends SQLiteOpenHelper {
     	return provider;
     }
     
-	public void addProvider(String name, String provider_url, String redirect_url, String client_id, String client_secret) {
+    public Provider getProviderById(Integer providerId) {
+		Log.d(TAG,"XXX getProviderById: " + providerId);
+		
+		Provider provider;
+		ArrayList<Provider> assetProviders;
+		
+    	try {
+    		assetProviders = getProviders(_ID + " = ?", new String[] {providerId.toString()});
+    	} finally {
+    		close();
+    	}
+    	
+    	provider = assetProviders.get(0);
+    	return provider;
+    }
+    
+	public Provider addProvider(String name, String provider_url, String redirect_url, String client_id, String client_secret) {
     	Log.d(TAG,"ProviderData#addProvider: " + name);
 
 		SQLiteDatabase db = getWritableDatabase();
@@ -160,6 +193,8 @@ public class ProviderData extends SQLiteOpenHelper {
 		
 		//values.put(PROVIDER_CREATED_AT, System.currentTimeMillis());
 		db.insertOrThrow(PROVIDERS_TABLE_NAME, null, values);
+		
+		return getProvider(provider_url);
 	}
 	
 	public ArrayList<AccessToken> getAccessTokens(String selection, String [] selectionArgs) {
@@ -242,6 +277,7 @@ public class ProviderData extends SQLiteOpenHelper {
 	            ob.setId(cursor.getInt(cursor.getColumnIndex(_ID)));
 	            ob.setUrl(cursor.getString(cursor.getColumnIndex(ASSET_URL)));
 	            ob.setName(cursor.getString(cursor.getColumnIndex(ASSET_NAME)));
+	            ob.setProviderId(cursor.getInt(cursor.getColumnIndex(ASSET_PROVIDER_ID)));
 	            resultList.add(ob);
 	        } catch (Exception e) {
       			e.printStackTrace();

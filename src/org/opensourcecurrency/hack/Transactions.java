@@ -40,8 +40,8 @@ public class Transactions extends ListActivity {
 		setContentView(R.layout.transactions);
 
 		providers = new ProviderData(this);
-		Provider provider = providers.getCurrentProvider(this);
-
+		Asset asset = providers.getCurrentAsset(this);
+		Provider provider = asset.getProvider();
 		
 		String access_token = provider.getAccessToken();
         Log.d(TAG,"access_token : " + access_token);
@@ -52,11 +52,9 @@ public class Transactions extends ListActivity {
     		toast.show();
         	return;
         }
-		
-		String asset_path="/transacts/hours";
     	
     	try {
-        	HttpGet transactionsRequest = new HttpGet(new URI(provider.providerUrl + asset_path));
+        	HttpGet transactionsRequest = new HttpGet(new URI(asset.url));
       		transactionsRequest.setHeader("Accept","application/json");
       		transactionsRequest.setHeader("Authorization","Bearer " + access_token);
         	RestTask task = new RestTask(this, OAUTH_LISTPAYMENTS_ACTION);

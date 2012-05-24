@@ -3,7 +3,6 @@
    <string name="hello">Hello World, Cyberwire!</string>
    <string name="app_name">Cyberwire</string>
    <string name="addprovider_label">Add Provider</string>
-   <string name="login_label">Login</string>
    <string name="settings_label">Settings</string>
    <string name="exit_label">Exit</string>
    

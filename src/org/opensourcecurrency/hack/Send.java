@@ -61,7 +61,8 @@ public class Send extends Activity implements OnClickListener {
     @Override
     public void onClick(View view) {    	
 		providers = new ProviderData(this);
-		Provider provider = providers.getCurrentProvider(this);
+		Asset asset = providers.getCurrentAsset(this);
+		Provider provider = asset.getProvider();
 		
 		String access_token = provider.getAccessToken();
         Log.d(TAG,"access_token : " + access_token);
@@ -72,8 +73,6 @@ public class Send extends Activity implements OnClickListener {
     		toast.show();
         	return;
         }
-        
-		String asset_path="/transacts/hours";
     	
     	switch (view.getId()) {
     	case R.id.pay_button:
@@ -81,7 +80,7 @@ public class Send extends Activity implements OnClickListener {
             //Log.d(TAG,"onClick: amount=" + amountText.getText().toString());
             //Log.d(TAG,"onClick:   note=" + noteText.getText().toString());        	
           	try {
-          		HttpPost paymentRequest = new HttpPost(new URI(provider.providerUrl+asset_path));
+          		HttpPost paymentRequest = new HttpPost(new URI(asset.url));
           		paymentRequest.setHeader("Accept","application/json");
           		paymentRequest.setHeader("Authorization","Bearer " + access_token);
         		List<NameValuePair> parameters = new ArrayList<NameValuePair>();

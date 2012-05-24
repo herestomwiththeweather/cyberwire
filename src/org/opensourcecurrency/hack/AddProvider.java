@@ -20,6 +20,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.net.Uri;
 import android.os.Bundle;
 import android.view.Gravity;
 import android.view.View;
@@ -31,6 +32,7 @@ import android.widget.Toast;
 import java.io.StringReader;
 import org.w3c.dom.*;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -41,9 +43,14 @@ public class AddProvider extends Activity implements OnClickListener {
 	private Button addProviderButton;
 	private static final String DYNREG_HOSTMETA_ACTION = "org.opensourcecurrency.hack.DYNREG_HOSTMETA";
 	private static final String DYNREG_REGISTER_ACTION = "org.opensourcecurrency.hack.DYNREG_REGISTER";
+	private static final String OAUTH_TOKEN_ACTION = "org.opensourcecurrency.hack.OAUTH_TOKEN";
+	private static final String WALLET_ACTION = "org.opensourcecurrency.hack.WALLET";
+
 	private static final String TAG = "OpenTransact";
 	private ProgressDialog progress;
+	private ProviderData providers;
 	String m_AssetProvider = null;
+	Provider m_Provider = null;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -81,12 +88,63 @@ public class AddProvider extends Activity implements OnClickListener {
       super.onResume();
       registerReceiver(receiver, new IntentFilter(DYNREG_HOSTMETA_ACTION));
       registerReceiver(receiver, new IntentFilter(DYNREG_REGISTER_ACTION));
+      registerReceiver(receiver, new IntentFilter(OAUTH_TOKEN_ACTION));
+      registerReceiver(receiver, new IntentFilter(WALLET_ACTION));
     }
     
     @Override
     public void onPause() {
     	super.onPause();
     	unregisterReceiver(receiver);
+    }
+    
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+    	Log.d(TAG,"AddProvider#onActivityResult");
+
+    	switch (requestCode) {
+    	case 0:
+    		if (resultCode != RESULT_OK || data == null) {
+    	    	Log.d(TAG,"XXX onActivityResult: BAD RESULT");
+    			return;
+    		}
+    		String token = data.getStringExtra("token");
+    		Log.d(TAG,token);
+    		Toast toast = Toast.makeText(this, token, Toast.LENGTH_LONG);
+    		toast.setGravity(Gravity.CENTER, 0, 0);
+    		toast.show();
+ 
+	    	String provider_url = m_Provider.providerUrl;
+			String redirect_url = m_Provider.redirectUrl;
+			String client_id = m_Provider.clientId;
+			String client_secret = m_Provider.clientSecret;
+			
+        	Log.d(TAG,"onActivityResult provider_url: " + provider_url);
+        	Log.d(TAG,"onActivityResult clientid: " + client_id);
+        	Log.d(TAG,"onActivityResult client secret: " + client_secret);
+        	Log.d(TAG,"onActivityResult redirect_uri: " + redirect_url);
+        	
+       		try {
+      		  String url = provider_url + "/oauth/token";
+      		  HttpPost tokenRequest = new HttpPost(new URI(url));
+      		  List<NameValuePair> parameters = new ArrayList<NameValuePair>();
+      		  parameters.add(new BasicNameValuePair("client_id", client_id));
+      		  parameters.add(new BasicNameValuePair("client_secret", client_secret));
+      		  parameters.add(new BasicNameValuePair("code", token));
+      		  parameters.add(new BasicNameValuePair("grant_type","authorization_code"));
+      		  parameters.add(new BasicNameValuePair("redirect_uri",redirect_url));
+      		  tokenRequest.setEntity(new UrlEncodedFormEntity(parameters));
+      		  
+      		  RestTask task = new RestTask(this, OAUTH_TOKEN_ACTION);
+      		  task.execute(tokenRequest);
+            	  progress = ProgressDialog.show(this, "Fetching token", "Waiting...", true);
+
+      		} catch (Exception e) {
+      			e.printStackTrace();
+      		}
+    		return;
+    	}
+    	super.onActivityResult(requestCode, resultCode, data);
     }
     
     private BroadcastReceiver receiver = new BroadcastReceiver() {
@@ -98,7 +156,8 @@ public class AddProvider extends Activity implements OnClickListener {
     	static final String TYPE = "push";
     	static final String APPLICATION_TYPE = "noredirect";
     	private ProviderData providers;
-    	String m_provider = null;
+    	//String m_provider = null;
+
 		String m_dynreg_endpoint = null;
     	
     	private String getClientRegistrationEndpoint(Intent intent) {
@@ -156,24 +215,94 @@ public class AddProvider extends Activity implements OnClickListener {
           	}
     	}
     	
-    	private void createNewProvider(Context context, Intent intent) {
+    	private Provider createNewProvider(Context context, Intent intent) {
     		String response = intent.getStringExtra(RestTask.HTTP_RESPONSE);
     		Log.d(TAG,"createNewProvider() asset provider: "+m_AssetProvider);
     		Log.d(TAG,"createNewProvider() response(register): "+response);
     		providers=new ProviderData(context);
+    		Provider provider = null;
+    		
     		JSONObject clientRegistration = null;
     		try {
         		clientRegistration = new JSONObject(response);
-        		providers.addProvider(m_AssetProvider, // XXX would be nice to have a friendly name
-        				              m_AssetProvider, 
-			                          clientRegistration.getString("redirect_url"), 
-			                          clientRegistration.getString("client_id"), 
-			                          clientRegistration.getString("client_secret"));
+        		provider = providers.addProvider(m_AssetProvider, // XXX would be nice to have a friendly name
+        				                         m_AssetProvider, 
+			                                     clientRegistration.getString("redirect_url"), 
+			                                     clientRegistration.getString("client_id"), 
+			                                     clientRegistration.getString("client_secret"));
     		}catch (JSONException e) {
       		    e.printStackTrace();
       		}
+    		
+    		return provider;
     	}
     	
+        String addAccessToken(Context context, Intent intent, Provider provider) {
+    		String response = intent.getStringExtra(RestTask.HTTP_RESPONSE);
+    		Log.d(TAG,"response: "+response);
+    		
+    		String access_token = null;
+    		
+    		if(null == response) {
+    			return "";
+    		}
+
+    		try {
+              JSONObject access_token_response = new JSONObject(response);
+          	  access_token = access_token_response.getString("access_token");
+          	  Log.d(TAG," access token: " + access_token);
+          	  provider.addAccessToken(access_token, 0, "");
+
+          	  //String refresh_token = access_token_response.getString("refresh_token");
+          	  //String expires_in = access_token_response.getString("expires_in");
+
+          	  //Log.d(TAG,"refresh token: " + refresh_token);
+          	  //Log.d(TAG,"   expires_in: " + expires_in);
+
+
+      		} catch (JSONException e) {
+      		  e.printStackTrace();
+      		  return "";
+      		}
+    		
+        	return access_token;
+        }
+        
+        private void getWallet(Context context, String access_token, Provider provider) {
+        	String wallet_path = "/wallet";
+        	
+           	try {
+            	HttpGet walletRequest = new HttpGet(new URI(provider.providerUrl + wallet_path));
+          		walletRequest.setHeader("Accept","application/json");
+          		walletRequest.setHeader("Authorization","Bearer " + access_token);
+            	RestTask task = new RestTask(context, WALLET_ACTION);
+            	task.execute(walletRequest);
+            	progress = ProgressDialog.show(context, "Fetching wallet", "Waiting...", true);
+        	} catch(Exception e) {
+            	e.printStackTrace();    		
+        	}
+        }
+        
+        boolean addAssets(Intent intent, Provider provider) {
+    		String response = intent.getStringExtra(RestTask.HTTP_RESPONSE);
+    		Log.d(TAG,"response: "+response);
+    		try {
+    	          JSONObject wallet_response = new JSONObject(response);
+    	      	  Integer total = wallet_response.getInt("total");
+    	      	  Log.d(TAG,"wallet total: " + total);
+    	      	  JSONArray assets = wallet_response.getJSONArray("assets");
+    	      	  for(int i=0;i<assets.length();i++) {
+    	      		  JSONObject asset = assets.getJSONObject(i);
+    	      		  provider.addAsset(asset.getString("name"), asset.getString("url"));
+    	      	  }
+      		} catch (JSONException e) {
+      		  e.printStackTrace();
+      		  return false;
+      		}
+    		
+    		return true;
+        }
+        
     	@Override
     	public void onReceive(Context context, Intent intent) {
     		Log.d(TAG,"onReceive called!");
@@ -193,8 +322,30 @@ public class AddProvider extends Activity implements OnClickListener {
     			}
     			registerOAuthClient(m_dynreg_endpoint, context);
     		} else if(intent.getAction().equals(DYNREG_REGISTER_ACTION)) {
-        		createNewProvider(context,intent);
-    		} else {
+        		m_Provider = createNewProvider(context,intent);
+        		Intent intent2 = new Intent(context,WebViewActivity.class);
+        		
+            	Log.d(TAG,"onReceive[login] provider_name: " + m_Provider.providerName);
+            	Log.d(TAG,"onReceive[login] provider_url: " + m_Provider.providerUrl);
+            	Log.d(TAG,"onReceive[login] clientid: " + m_Provider.clientId);
+            	Log.d(TAG,"onReceive[login] redirect_uri: " + m_Provider.redirectUrl);
+        		intent2.setData(Uri.parse(m_Provider.providerUrl+"/oauth/authorize?client_id="+m_Provider.clientId+"&response_type=code&redirect_uri="+m_Provider.redirectUrl));
+
+        		startActivityForResult(intent2,0);
+    		} else if(intent.getAction().equals(OAUTH_TOKEN_ACTION)) {
+    			String token = null;
+    			token = addAccessToken(context,intent,m_Provider);
+    			if(token.equals("")) {
+    				Log.d(TAG,"addAccessToken failed!");
+    			} else {
+    				getWallet(context,token,m_Provider);
+    			}
+    		} else if(intent.getAction().equals(WALLET_ACTION)) {
+    			// XXX add assets from wallet
+    			Log.d(TAG,"onReceive WALLET!!!");
+    			addAssets(intent,m_Provider);
+    		}
+    		else {
         		Log.d(TAG,"XXX unrecognized action for AddProvider");
     		}
 
