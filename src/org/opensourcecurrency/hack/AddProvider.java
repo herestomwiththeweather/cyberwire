@@ -283,9 +283,17 @@ public class AddProvider extends Activity implements OnClickListener {
         	}
         }
         
-        boolean addAssets(Intent intent, Provider provider) {
+        boolean addAssets(Context context, Intent intent, Provider provider) {
     		String response = intent.getStringExtra(RestTask.HTTP_RESPONSE);
     		Log.d(TAG,"response: "+response);
+    		
+    		if(null == response) {
+	    		Toast toast = Toast.makeText(context, "Error retrieving wallet", Toast.LENGTH_LONG);
+	    		toast.setGravity(Gravity.CENTER, 0, 0);
+	    		toast.show();
+    			return false;
+    		}
+    		
     		try {
     	          JSONObject wallet_response = new JSONObject(response);
     	      	  Integer total = wallet_response.getInt("total");
@@ -343,7 +351,7 @@ public class AddProvider extends Activity implements OnClickListener {
     		} else if(intent.getAction().equals(WALLET_ACTION)) {
     			// XXX add assets from wallet
     			Log.d(TAG,"onReceive WALLET!!!");
-    			addAssets(intent,m_Provider);
+    			addAssets(context,intent,m_Provider);
     		}
     		else {
         		Log.d(TAG,"XXX unrecognized action for AddProvider");
