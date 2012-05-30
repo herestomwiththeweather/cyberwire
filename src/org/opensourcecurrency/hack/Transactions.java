@@ -30,9 +30,11 @@ import org.opensourcecurrency.hack.RestTask;
 public class Transactions extends ListActivity {    
 	TextView selection;
 	private static final String OAUTH_LISTPAYMENTS_ACTION = "org.opensourcecurrency.hack.OAUTH_LISTPAYMENTS";
+	private static final String OAUTH_LISTPAYMENTS_USER_ACTION = "org.opensourcecurrency.hack.OAUTH_LISTPAYMENTS_USER";
 	private static final String TAG = "OpenTransact";
 	private ProviderData providers;
 	private ProgressDialog progress;
+	Asset m_Asset = null;
 	Provider m_Provider = null;
     
 	@Override
@@ -41,29 +43,16 @@ public class Transactions extends ListActivity {
 		setContentView(R.layout.transactions);
 
 		providers = new ProviderData(this);
-		Asset asset = providers.getCurrentAsset(this);
-		m_Provider = asset.getProvider();
+		m_Asset = providers.getCurrentAsset(this);
+		m_Provider = m_Asset.getProvider();
 		
-		String access_token = m_Provider.getAccessToken();
-        Log.d(TAG,"access_token : " + access_token);
-        
-        if(access_token.equals("")) {
-    		Toast toast = Toast.makeText(this, "No access token yet!", Toast.LENGTH_LONG);
-    		toast.setGravity(Gravity.CENTER, 0, 0);
-    		toast.show();
-        	return;
-        }
-    	
-    	try {
-        	HttpGet transactionsRequest = new HttpGet(new URI(asset.url));
-      		transactionsRequest.setHeader("Accept","application/json");
-      		transactionsRequest.setHeader("Authorization","Bearer " + access_token);
-        	RestTask task = new RestTask(this, OAUTH_LISTPAYMENTS_ACTION);
-        	task.execute(transactionsRequest);
+		if(null == m_Provider.getUser()) {
+			m_Provider.getUserInfo(this, OAUTH_LISTPAYMENTS_USER_ACTION);
+        	progress = ProgressDialog.show(this, "Fetching profile", "Waiting...", true);
+		} else {
+			m_Asset.getTransactions(this, OAUTH_LISTPAYMENTS_ACTION);
         	progress = ProgressDialog.show(this, "Fetching Transactions", "Waiting...", true);
-    	} catch(Exception e) {
-        	e.printStackTrace();    		
-    	}
+		}
 	}
     
 	public void onListItemClick(ListView parent, View v, int position, long id) {
@@ -74,6 +63,7 @@ public class Transactions extends ListActivity {
     public void onResume() {
       super.onResume();
       registerReceiver(receiver, new IntentFilter(OAUTH_LISTPAYMENTS_ACTION));
+      registerReceiver(receiver, new IntentFilter(OAUTH_LISTPAYMENTS_USER_ACTION));
     }
     
     @Override
@@ -117,25 +107,49 @@ public class Transactions extends ListActivity {
     		if(progress != null) {
     			progress.dismiss();
     		}
-
-    	    String emailAddress = m_Provider.getUser().email;
+    		
     		String response = intent.getStringExtra(RestTask.HTTP_RESPONSE);
     		Log.d(TAG,"response(Transactions): "+response);
-
-    		try {
-              JSONArray transactions_response = new JSONArray(response);
-          	  String[] items = new String[transactions_response.length()];
-              for(int i=0;i<transactions_response.length();i++) {
-            	  JSONObject transact = transactions_response.getJSONObject(i);
-            	  String amount = transact.getString("amount");
-            	  String sign = isPayer(transact,emailAddress) ? "-" : "+";
-            	  items[i] = sign + amount + " " + counterparty(transact,emailAddress);
-              }
-              setListAdapter(new ArrayAdapter<String>(context,android.R.layout.simple_list_item_1,items));
-    		  selection=(TextView)findViewById(R.id.selection);
-    		} catch (JSONException e) {
-    		  e.printStackTrace();
+    		
+    		if(null == response) {
+	    		Toast toast = Toast.makeText(context, "Error retrieving transactions", Toast.LENGTH_LONG);
+	    		toast.setGravity(Gravity.CENTER, 0, 0);
+	    		toast.show();
+    			return;
     		}
+    		
+    		if(intent.getAction().equals(OAUTH_LISTPAYMENTS_ACTION)) {
+        	    String emailAddress = m_Provider.getUser().email;
+
+        		try { 
+                  JSONArray transactions_response = new JSONArray(response);
+              	  String[] items = new String[transactions_response.length()];
+                  for(int i=0;i<transactions_response.length();i++) {
+                	  JSONObject transact = transactions_response.getJSONObject(i);
+                	  String amount = transact.getString("amount");
+                	  String sign = isPayer(transact,emailAddress) ? "-" : "+";
+                	  items[i] = sign + amount + " " + counterparty(transact,emailAddress);
+                  }
+                  setListAdapter(new ArrayAdapter<String>(context,android.R.layout.simple_list_item_1,items));
+        		  selection=(TextView)findViewById(R.id.selection);
+        		} catch (JSONException e) {
+        		  e.printStackTrace();
+        		}
+    		} else if(intent.getAction().equals(OAUTH_LISTPAYMENTS_USER_ACTION)) {
+        		try {
+                  JSONObject profile_response = new JSONObject(response);
+                  String email = profile_response.getString("email");
+                  Log.d(TAG,"adding email: " + email);
+          		  m_Provider.addUser(profile_response);
+          		} catch (JSONException e) {
+          		  e.printStackTrace();
+          		}
+        		
+    			m_Asset.getTransactions(context, OAUTH_LISTPAYMENTS_ACTION);
+            	progress = ProgressDialog.show(context, "Fetching Transactions", "Waiting...", true);
+    		}
+
+
     	}
     };
 }

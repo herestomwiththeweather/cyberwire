@@ -365,7 +365,7 @@ public class ProviderData extends SQLiteOpenHelper {
 		values.put(USER_PROVIDER_ID, provider_id);
 		values.put(USER_NAME, name);
 		values.put(USER_EMAIL, email);
-		values.put(ASSET_URL, url);
+		values.put(USER_URL, url);
 		values.put(USER_WEBSITE_URL, website_url);
 		values.put(USER_PICTURE_URL, picture_url);
 		values.put(USER_USER_ID, user_id);
