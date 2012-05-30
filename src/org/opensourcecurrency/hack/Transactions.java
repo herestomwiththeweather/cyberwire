@@ -33,6 +33,7 @@ public class Transactions extends ListActivity {
 	private static final String TAG = "OpenTransact";
 	private ProviderData providers;
 	private ProgressDialog progress;
+	Provider m_Provider = null;
     
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -41,9 +42,9 @@ public class Transactions extends ListActivity {
 
 		providers = new ProviderData(this);
 		Asset asset = providers.getCurrentAsset(this);
-		Provider provider = asset.getProvider();
+		m_Provider = asset.getProvider();
 		
-		String access_token = provider.getAccessToken();
+		String access_token = m_Provider.getAccessToken();
         Log.d(TAG,"access_token : " + access_token);
         
         if(access_token.equals("")) {
@@ -116,8 +117,8 @@ public class Transactions extends ListActivity {
     		if(progress != null) {
     			progress.dismiss();
     		}
-    		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
-    	    String emailAddress = prefs.getString("emailPref","");
+
+    	    String emailAddress = m_Provider.getUser().email;
     		String response = intent.getStringExtra(RestTask.HTTP_RESPONSE);
     		Log.d(TAG,"response(Transactions): "+response);
 
