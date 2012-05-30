@@ -19,6 +19,16 @@ import static org.opensourcecurrency.hack.ConstantsAssets.ASSET_URL;
 import static org.opensourcecurrency.hack.ConstantsAssets.ASSET_NAME;
 import static org.opensourcecurrency.hack.ConstantsAssets.ASSET_CREATED_AT;
 
+import static org.opensourcecurrency.hack.ConstantsUsers.USERS_TABLE_NAME;
+import static org.opensourcecurrency.hack.ConstantsUsers.USER_PROVIDER_ID;
+import static org.opensourcecurrency.hack.ConstantsUsers.USER_URL;
+import static org.opensourcecurrency.hack.ConstantsUsers.USER_WEBSITE_URL;
+import static org.opensourcecurrency.hack.ConstantsUsers.USER_PICTURE_URL;
+import static org.opensourcecurrency.hack.ConstantsUsers.USER_NAME;
+import static org.opensourcecurrency.hack.ConstantsUsers.USER_EMAIL;
+import static org.opensourcecurrency.hack.ConstantsUsers.USER_USER_ID;
+import static org.opensourcecurrency.hack.ConstantsUsers.USER_CREATED_AT;
+
 import static org.opensourcecurrency.hack.ConstantsAccessTokens.ACCESS_TOKENS_TABLE_NAME;
 import static org.opensourcecurrency.hack.ConstantsAccessTokens.ACCESS_TOKEN_PROVIDER_ID;
 import static org.opensourcecurrency.hack.ConstantsAccessTokens.REFRESH_TOKEN_ID;
@@ -52,6 +62,7 @@ public class ProviderData extends SQLiteOpenHelper {
 	private static String[] FROM = { _ID, NAME,PROVIDER_URL,REDIRECT_URL,CLIENT_ID,CLIENT_SECRET,PROVIDER_CREATED_AT };
 	private static String[] TOKENS_FROM = { _ID, ACCESS_TOKEN_PROVIDER_ID,REFRESH_TOKEN_ID,ACCESS_TOKEN,ACCESS_TOKEN_EXPIRES_AT,ACCESS_TOKEN_CREATED_AT };
     private static String[] ASSETS_FROM = { _ID, ASSET_PROVIDER_ID, ASSET_URL, ASSET_NAME, ASSET_CREATED_AT };
+    private static String[] USERS_FROM = { _ID, USER_PROVIDER_ID, USER_URL, USER_WEBSITE_URL, USER_PICTURE_URL, USER_NAME, USER_EMAIL, USER_USER_ID, USER_CREATED_AT };
     
 	public ProviderData(Context ctx) {
 	      super(ctx, DATABASE_NAME, null, DATABASE_VERSION);
@@ -68,6 +79,16 @@ public class ProviderData extends SQLiteOpenHelper {
 	              + " TEXT NOT NULL, " + CLIENT_ID
 	              + " TEXT NOT NULL, " + CLIENT_SECRET
 	              + " TEXT NOT NULL," + PROVIDER_CREATED_AT + " DATE);");
+	      
+	      db.execSQL("CREATE TABLE " + USERS_TABLE_NAME + " (" + _ID
+	              + " INTEGER PRIMARY KEY AUTOINCREMENT, " + USER_PROVIDER_ID 
+	              + " INTEGER, " + USER_URL
+	              + " TEXT NOT NULL," + USER_WEBSITE_URL
+	              + " TEXT NOT NULL," + USER_PICTURE_URL
+	              + " TEXT NOT NULL," + USER_NAME
+	              + " TEXT NOT NULL," + USER_EMAIL
+	              + " TEXT NOT NULL," + USER_USER_ID
+	              + " TEXT NOT NULL," + USER_CREATED_AT + " DATE);");
 	      
 	      db.execSQL("CREATE TABLE " + ASSETS_TABLE_NAME + " (" + _ID
 	              + " INTEGER PRIMARY KEY AUTOINCREMENT, " + ASSET_PROVIDER_ID 
@@ -222,6 +243,50 @@ public class ProviderData extends SQLiteOpenHelper {
 	    return resultList;
 	}
 	
+	public ArrayList<User> getUsers(String selection, String [] selectionArgs) {
+    	Log.d(TAG,"XXX ProviderData#getUsers");
+		SQLiteDatabase db = getReadableDatabase();
+	    ArrayList<User> resultList = new ArrayList<User>();
+
+		Cursor cursor = db.query(USERS_TABLE_NAME, USERS_FROM, selection, selectionArgs, null, null, null);
+    	Log.d(TAG,"XXX ProviderData#getUsers count: " + cursor.getCount());
+	    while (cursor.moveToNext())
+	    {			
+	        try {
+	            User ob = new User();
+	            ob.setId(cursor.getInt(cursor.getColumnIndex(_ID)));
+	            ob.setEmail(cursor.getString(cursor.getColumnIndex(USER_EMAIL)));
+	            resultList.add(ob);
+	        } catch (Exception e) {
+      			e.printStackTrace();
+	        }
+	    }
+
+	    cursor.close();
+	    db.close();
+	    
+	    return resultList;
+	}
+	
+	public User getUser(Integer provider_id) {
+		Log.d(TAG,"XXX getUser: " + provider_id);
+		
+		User user;
+		ArrayList<User> users;
+		
+    	try {
+    		users = getUsers(USER_PROVIDER_ID + " = ?", new String[] {provider_id.toString()});
+    	} finally {
+    		close();
+    	}
+    	if(0 == users.size()) {
+    		user = null;
+    	} else {
+    		user = users.get(0);
+    	}
+    	return user;
+	}
+	
     public AccessToken getAccessToken(Integer provider_id) {
 		Log.d(TAG,"XXX getAccessToken: " + provider_id);
 		
@@ -290,6 +355,28 @@ public class ProviderData extends SQLiteOpenHelper {
 	    return resultList;
 	}
 
+	public void addUser(Integer provider_id, String name, String email, String url, String website_url, String picture_url, String user_id) {
+		Log.d(TAG,"ProviderData#addUser name: " + name);
+		Log.d(TAG,"ProviderData#addUser  email: " + email);
+		
+		SQLiteDatabase db = getWritableDatabase();
+		ContentValues values = new ContentValues();
+		
+		values.put(USER_PROVIDER_ID, provider_id);
+		values.put(USER_NAME, name);
+		values.put(USER_EMAIL, email);
+		values.put(ASSET_URL, url);
+		values.put(USER_WEBSITE_URL, website_url);
+		values.put(USER_PICTURE_URL, picture_url);
+		values.put(USER_USER_ID, user_id);
+		
+		Date now = new Date();
+		SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+		values.put(USER_CREATED_AT, dateFormat.format(now));
+		
+		db.insertOrThrow(USERS_TABLE_NAME, null, values);
+	}
+	
     public void addAsset(Integer provider_id, String name, String url) {
 		Log.d(TAG,"ProviderData#addAsset name: " + name);
 		Log.d(TAG,"ProviderData#addAsset  url: " + url);

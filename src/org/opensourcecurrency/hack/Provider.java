@@ -2,7 +2,14 @@ package org.opensourcecurrency.hack;
 
 import static org.opensourcecurrency.hack.ConstantsAssets.ASSET_PROVIDER_ID;
 
+import java.net.URI;
 import java.util.ArrayList;
+
+import org.apache.http.client.methods.HttpGet;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import android.content.Context;
 
 public class Provider {
 	public Integer providerId;
@@ -51,6 +58,36 @@ public class Provider {
 		m_providers.addAsset(providerId,name,url);
 	}
 	
+	public void getUserInfo(Context context, String action) {
+		String access_token = getAccessToken();
+        
+		String about_user="/user_info";
+
+    	try {
+        	HttpGet userinfoRequest = new HttpGet(new URI(providerUrl + about_user));
+      		userinfoRequest.setHeader("Accept","application/json");
+      		userinfoRequest.setHeader("Authorization","Bearer " + access_token);
+        	RestTask task = new RestTask(context, action);
+        	task.execute(userinfoRequest);
+    	} catch(Exception e) {
+        	e.printStackTrace();    		
+    	}
+	}
+	
+	public void addUser(JSONObject r) {
+		try {
+			String name = r.getString("name");
+			String email = r.getString("email");
+			String url = r.getString("profile");
+			String website_url = r.getString("website");
+			String picture_url = r.getString("picture");
+			String user_id = r.getString("user_id");
+			m_providers.addUser(providerId,name,email,url,website_url,picture_url,user_id);
+		} catch (JSONException e) {
+  		  e.printStackTrace();
+  		}
+	}
+	
 	public ArrayList<Asset> getAssets() {
 		ArrayList<Asset> assets;
 		
@@ -61,6 +98,10 @@ public class Provider {
     	}
     	
     	return assets;
+	}
+	
+	public User getUser() {
+		return m_providers.getUser(providerId);
 	}
 
 	public String getAccessToken() {
