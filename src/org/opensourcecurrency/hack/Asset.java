@@ -14,6 +14,7 @@ public class Asset {
 	public Integer assetId;
 	public String url;
 	public String name;
+	public String balance;
 	
 	public Integer m_providerId;
 	private Provider m_provider;
@@ -52,6 +53,10 @@ public class Asset {
 	
 	public void setName(String asset_name) {
 		name = asset_name;
+	}
+	
+	public void setBalance(String asset_balance) {
+		balance = asset_balance;
 	}
 	
 	public void setProviderId(Integer provider_id) {

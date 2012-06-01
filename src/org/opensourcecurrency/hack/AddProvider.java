@@ -301,7 +301,7 @@ public class AddProvider extends Activity implements OnClickListener {
     	      	  JSONArray assets = wallet_response.getJSONArray("assets");
     	      	  for(int i=0;i<assets.length();i++) {
     	      		  JSONObject asset = assets.getJSONObject(i);
-    	      		  provider.addAsset(asset.getString("name"), asset.getString("url"));
+    	      		  provider.addAsset(asset.getString("name"), asset.getString("url"), asset.getString("balance"));
     	      	  }
       		} catch (JSONException e) {
       		  e.printStackTrace();

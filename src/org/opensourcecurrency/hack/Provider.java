@@ -54,8 +54,8 @@ public class Provider {
 		m_providers.addAccessToken(providerId,token,expires_in,null);
 	}
 	
-	public void addAsset(String name, String url) {
-		m_providers.addAsset(providerId,name,url);
+	public void addAsset(String name, String url, String balance) {
+		m_providers.addAsset(providerId,name,url,balance);
 	}
 	
 	public void getUserInfo(Context context, String action) {

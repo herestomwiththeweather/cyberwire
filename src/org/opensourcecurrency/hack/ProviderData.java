@@ -17,6 +17,7 @@ import static org.opensourcecurrency.hack.ConstantsAssets.ASSETS_TABLE_NAME;
 import static org.opensourcecurrency.hack.ConstantsAssets.ASSET_PROVIDER_ID;
 import static org.opensourcecurrency.hack.ConstantsAssets.ASSET_URL;
 import static org.opensourcecurrency.hack.ConstantsAssets.ASSET_NAME;
+import static org.opensourcecurrency.hack.ConstantsAssets.ASSET_BALANCE;
 import static org.opensourcecurrency.hack.ConstantsAssets.ASSET_CREATED_AT;
 
 import static org.opensourcecurrency.hack.ConstantsUsers.USERS_TABLE_NAME;
@@ -61,7 +62,7 @@ public class ProviderData extends SQLiteOpenHelper {
 
 	private static String[] FROM = { _ID, NAME,PROVIDER_URL,REDIRECT_URL,CLIENT_ID,CLIENT_SECRET,PROVIDER_CREATED_AT };
 	private static String[] TOKENS_FROM = { _ID, ACCESS_TOKEN_PROVIDER_ID,REFRESH_TOKEN_ID,ACCESS_TOKEN,ACCESS_TOKEN_EXPIRES_AT,ACCESS_TOKEN_CREATED_AT };
-    private static String[] ASSETS_FROM = { _ID, ASSET_PROVIDER_ID, ASSET_URL, ASSET_NAME, ASSET_CREATED_AT };
+    private static String[] ASSETS_FROM = { _ID, ASSET_PROVIDER_ID, ASSET_URL, ASSET_NAME, ASSET_BALANCE, ASSET_CREATED_AT };
     private static String[] USERS_FROM = { _ID, USER_PROVIDER_ID, USER_URL, USER_WEBSITE_URL, USER_PICTURE_URL, USER_NAME, USER_EMAIL, USER_USER_ID, USER_CREATED_AT };
     
 	public ProviderData(Context ctx) {
@@ -94,6 +95,7 @@ public class ProviderData extends SQLiteOpenHelper {
 	              + " INTEGER PRIMARY KEY AUTOINCREMENT, " + ASSET_PROVIDER_ID 
 	              + " INTEGER, " + ASSET_URL
 	              + " TEXT UNIQUE NOT NULL," + ASSET_NAME
+	              + " TEXT NOT NULL," + ASSET_BALANCE
 	              + " TEXT NOT NULL," + ASSET_CREATED_AT + " DATE);");
 	      
 	      db.execSQL("CREATE TABLE " + ACCESS_TOKENS_TABLE_NAME + " (" + _ID
@@ -346,6 +348,7 @@ public class ProviderData extends SQLiteOpenHelper {
 	            ob.setId(cursor.getInt(cursor.getColumnIndex(_ID)));
 	            ob.setUrl(cursor.getString(cursor.getColumnIndex(ASSET_URL)));
 	            ob.setName(cursor.getString(cursor.getColumnIndex(ASSET_NAME)));
+	            ob.setBalance(cursor.getString(cursor.getColumnIndex(ASSET_BALANCE)));
 	            ob.setProviderId(cursor.getInt(cursor.getColumnIndex(ASSET_PROVIDER_ID)));
 	            resultList.add(ob);
 	        } catch (Exception e) {
@@ -381,9 +384,10 @@ public class ProviderData extends SQLiteOpenHelper {
 		db.insertOrThrow(USERS_TABLE_NAME, null, values);
 	}
 	
-    public void addAsset(Integer provider_id, String name, String url) {
-		Log.d(TAG,"ProviderData#addAsset name: " + name);
-		Log.d(TAG,"ProviderData#addAsset  url: " + url);
+    public void addAsset(Integer provider_id, String name, String url, String balance) {
+		Log.d(TAG,"ProviderData#addAsset    name: " + name);
+		Log.d(TAG,"ProviderData#addAsset     url: " + url);
+		Log.d(TAG,"ProviderData#addAsset balance: " + balance);
 		
 		SQLiteDatabase db = getWritableDatabase();
 		ContentValues values = new ContentValues();
@@ -391,6 +395,7 @@ public class ProviderData extends SQLiteOpenHelper {
 		values.put(ASSET_PROVIDER_ID, provider_id);
 		values.put(ASSET_NAME, name);
 		values.put(ASSET_URL, url);
+		values.put(ASSET_BALANCE, balance);
 		
 		Date now = new Date();
 		SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");

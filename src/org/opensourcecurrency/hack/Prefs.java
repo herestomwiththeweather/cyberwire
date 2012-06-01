@@ -1,32 +1,23 @@
 package org.opensourcecurrency.hack;
 
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 
-import android.content.ContentValues;
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.database.Cursor;
-import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.preference.PreferenceActivity;
 import android.preference.PreferenceScreen;
 import android.preference.PreferenceCategory;
 
 import android.preference.ListPreference;
+import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.util.Log;
 
-import static android.provider.BaseColumns._ID;
-import static org.opensourcecurrency.hack.ConstantsAssets.ASSET_PROVIDER_ID;
-import static org.opensourcecurrency.hack.ConstantsProviders.PROVIDERS_TABLE_NAME;
-import static org.opensourcecurrency.hack.ConstantsProviders.NAME;
-import static org.opensourcecurrency.hack.ConstantsProviders.PROVIDER_URL;
-import static org.opensourcecurrency.hack.ConstantsProviders.REDIRECT_URL;
-import static org.opensourcecurrency.hack.ConstantsProviders.CLIENT_ID;
-import static org.opensourcecurrency.hack.ConstantsProviders.CLIENT_SECRET;
-import static org.opensourcecurrency.hack.ConstantsProviders.PROVIDER_CREATED_AT;
 
-public class Prefs extends PreferenceActivity {
+public class Prefs extends PreferenceActivity implements OnSharedPreferenceChangeListener {
 	private static final String TAG = "OpenTransact";
+	private static final String PREFCHANGE_ACTION = "org.opensourcecurrency.hack.PREF_CHANGE";
 	private ProviderData providers;
 	
 	   @Override
@@ -34,6 +25,24 @@ public class Prefs extends PreferenceActivity {
 	      super.onCreate(savedInstanceState);
 	      //addPreferencesFromResource(R.xml.settings);
 	      setPreferenceScreen(createPreferenceHierarchy());
+	   }
+	   
+	   @Override
+	   public void onResume() {
+		   super.onResume();
+		   getPreferenceScreen().getSharedPreferences().registerOnSharedPreferenceChangeListener(this);
+	   }
+	    
+	   @Override
+	   public void onPause() {
+		   super.onPause();
+		   getPreferenceScreen().getSharedPreferences().unregisterOnSharedPreferenceChangeListener(this);
+	   }
+	    
+	   @Override
+   	   public void onSharedPreferenceChanged(SharedPreferences prefs, String key) {
+	       Intent intent = new Intent(PREFCHANGE_ACTION);
+		   sendBroadcast(intent);
 	   }
 	   
 	   private PreferenceScreen createPreferenceHierarchy() {

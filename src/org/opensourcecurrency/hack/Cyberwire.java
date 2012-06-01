@@ -5,27 +5,46 @@ import android.view.View.OnClickListener;
 
 import android.app.Activity;
 
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Bundle;
 
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.widget.Button;
 
 
 
 public class Cyberwire extends Activity implements OnClickListener {
 	private static final String TAG = "OpenTransact";
+	private static final String PREFCHANGE_ACTION = "org.opensourcecurrency.hack.PREF_CHANGE";
+	
+	Button btn;
+	ProviderData providers;
+	Asset m_Asset = null;
 	
     /** Called when the activity is first created. */
     @Override
     public void onCreate(Bundle savedInstanceState) {
-
+    	Log.d(TAG,"Cyberwire#onCreate");
     	//this.deleteDatabase("providers.db");
     	
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
+        
+		providers = new ProviderData(this);
+	    m_Asset = providers.getCurrentAsset(this);
+		
+        btn = (Button)findViewById(R.id.assetname_button);
+        if(null == m_Asset) {
+        	btn.setText("No asset");
+        } else {
+            btn.setText(m_Asset.balance + " " + m_Asset.name);
+        }
         
         View sendButton = findViewById(R.id.send_button);
         sendButton.setOnClickListener(this);
@@ -53,6 +72,30 @@ public class Cyberwire extends Activity implements OnClickListener {
     		break;
     	}
     }
+    
+    @Override
+    public void onResume() {
+      super.onResume();
+      registerReceiver(receiver, new IntentFilter(PREFCHANGE_ACTION));
+    }
+    
+    @Override
+    public void onPause() {
+    	super.onPause();
+    }
+    
+    private BroadcastReceiver receiver = new BroadcastReceiver() {
+    	public void onReceive(Context context, Intent intent) {
+    	    m_Asset = providers.getCurrentAsset(context);
+    		
+            btn = (Button)findViewById(R.id.assetname_button);
+            if(null == m_Asset) {
+            	btn.setText("No asset");
+            } else {
+                btn.setText(m_Asset.balance + " " + m_Asset.name);
+            }
+    	}
+    };
     
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
