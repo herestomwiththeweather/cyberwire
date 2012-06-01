@@ -31,6 +31,16 @@ public class Profile extends Activity {
         
 		providers = new ProviderData(this);
 		Asset asset = providers.getCurrentAsset(this);
+		if(null == asset) {
+    		Toast toast = Toast.makeText(this, "Please enter your asset provider.", Toast.LENGTH_LONG);
+    		toast.setGravity(Gravity.TOP, 0, 60);
+    		toast.show();
+			finish();
+    		Intent i = new Intent(this, AddProvider.class);
+    		startActivity(i);
+			return;
+		}
+		
 		Provider provider = asset.getProvider();
 		
 		User user = provider.getUser();

@@ -45,11 +45,26 @@ public class Send extends Activity implements OnClickListener {
 
 	private Button payButton;
 	
+	Asset m_Asset = null;
+	Provider m_Provider = null;
+	
     @Override
     public void onCreate(Bundle savedInstanceState) {
-
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.send);      	   
+        setContentView(R.layout.send);  
+        
+		providers = new ProviderData(this);
+		m_Asset = providers.getCurrentAsset(this);
+		if(null == m_Asset) {
+    		Toast toast = Toast.makeText(this, "Please enter your asset provider.", Toast.LENGTH_LONG);
+    		toast.setGravity(Gravity.TOP, 0, 60);
+    		toast.show();
+			finish();
+    		Intent i = new Intent(this, AddProvider.class);
+    		startActivity(i);
+			return;
+		}
+		    	   
         toText = (EditText) findViewById(R.id.to_field);
         amountText = (EditText) findViewById(R.id.amount_field);
         noteText = (EditText) findViewById(R.id.note_field);
@@ -60,11 +75,8 @@ public class Send extends Activity implements OnClickListener {
     
     @Override
     public void onClick(View view) {    	
-		providers = new ProviderData(this);
-		Asset asset = providers.getCurrentAsset(this);
-		Provider provider = asset.getProvider();
-		
-		String access_token = provider.getAccessToken();
+		m_Provider = m_Asset.getProvider();
+		String access_token = m_Provider.getAccessToken();
         Log.d(TAG,"access_token : " + access_token);
         
         if(access_token.equals("")) {
@@ -80,7 +92,7 @@ public class Send extends Activity implements OnClickListener {
             //Log.d(TAG,"onClick: amount=" + amountText.getText().toString());
             //Log.d(TAG,"onClick:   note=" + noteText.getText().toString());        	
           	try {
-          		HttpPost paymentRequest = new HttpPost(new URI(asset.url));
+          		HttpPost paymentRequest = new HttpPost(new URI(m_Asset.url));
           		paymentRequest.setHeader("Accept","application/json");
           		paymentRequest.setHeader("Authorization","Bearer " + access_token);
         		List<NameValuePair> parameters = new ArrayList<NameValuePair>();
@@ -121,6 +133,13 @@ public class Send extends Activity implements OnClickListener {
     		}
     		String response = intent.getStringExtra(RestTask.HTTP_RESPONSE);
     		Log.d(TAG,"response(Send): "+response);
+    		
+    		if(null == response) {
+	    		Toast toast = Toast.makeText(context, "Error making payment", Toast.LENGTH_LONG);
+	    		toast.setGravity(Gravity.CENTER, 0, 0);
+	    		toast.show();
+    			return;
+    		}
 
     		try {
               JSONObject payment_response = new JSONObject(response);

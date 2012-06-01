@@ -44,6 +44,16 @@ public class Transactions extends ListActivity {
 
 		providers = new ProviderData(this);
 		m_Asset = providers.getCurrentAsset(this);
+		if(null == m_Asset) {
+    		Toast toast = Toast.makeText(this, "Please enter your asset provider.", Toast.LENGTH_LONG);
+    		toast.setGravity(Gravity.TOP, 0, 60);
+    		toast.show();
+			finish();
+    		Intent i = new Intent(this, AddProvider.class);
+    		startActivity(i);
+			return;
+		}
+		
 		m_Provider = m_Asset.getProvider();
 		
 		if(null == m_Provider.getUser()) {

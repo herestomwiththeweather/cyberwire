@@ -153,7 +153,7 @@ public class ProviderData extends SQLiteOpenHelper {
     public Asset getAsset(String asset_url) {
 		Log.d(TAG,"XXX getAsset: " + asset_url);
 		
-		Asset asset;
+		Asset asset = null;
 		ArrayList<Asset> assets;
 		
     	try {
@@ -161,16 +161,18 @@ public class ProviderData extends SQLiteOpenHelper {
     	} finally {
     		close();
     	}
-    	
-    	asset = assets.get(0);
-    	asset.setProvider(getProviderById(asset.m_providerId));
+    	if(0 != assets.size()) {
+        	asset = assets.get(0);
+        	asset.setProvider(getProviderById(asset.m_providerId));
+    	}
+
     	return asset;
     }
 	
     public Provider getProvider(String providername) {
 		Log.d(TAG,"XXX getProvider: " + providername);
 		
-		Provider provider;
+		Provider provider = null;
 		ArrayList<Provider> assetProviders;
 		
     	try {
@@ -178,8 +180,10 @@ public class ProviderData extends SQLiteOpenHelper {
     	} finally {
     		close();
     	}
-    	
-    	provider = assetProviders.get(0);
+    	if(0 != assetProviders.size()) {
+        	provider = assetProviders.get(0);
+    	}
+
     	return provider;
     }
     

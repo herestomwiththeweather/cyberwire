@@ -1,52 +1,22 @@
 package org.opensourcecurrency.hack;
 
-import java.net.URI;
-import java.util.ArrayList;
-import java.util.List;
-
 import android.view.View;
 import android.view.View.OnClickListener;
 
-import org.apache.http.NameValuePair;
-import org.apache.http.client.entity.UrlEncodedFormEntity;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.message.BasicNameValuePair;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-import org.opensourcecurrency.hack.RestTask;
-import org.opensourcecurrency.hack.WebViewActivity;
-import org.opensourcecurrency.hack.Provider;
-
 import android.app.Activity;
-import android.app.ProgressDialog;
-import android.content.BroadcastReceiver;
-import android.content.Context;
+
 import android.content.Intent;
-import android.content.IntentFilter;
-import android.content.SharedPreferences;
-import android.net.Uri;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
-import android.database.Cursor;
 
 import android.util.Log;
-import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.widget.ArrayAdapter;
-import android.widget.TextView;
-import android.widget.Toast;
 
-import static org.opensourcecurrency.hack.ConstantsProviders.PROVIDER_URL;
 
 
 public class Cyberwire extends Activity implements OnClickListener {
 	private static final String TAG = "OpenTransact";
-
-	private ProgressDialog progress;
 	
     /** Called when the activity is first created. */
     @Override
