@@ -9,13 +9,17 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 
 import android.util.Log;
+import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.widget.Button;
+import android.widget.Toast;
 
 
 
@@ -31,8 +35,7 @@ public class Cyberwire extends Activity implements OnClickListener {
     @Override
     public void onCreate(Bundle savedInstanceState) {
     	Log.d(TAG,"Cyberwire#onCreate");
-    	//this.deleteDatabase("providers.db");
-    	
+		
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
         
@@ -114,7 +117,15 @@ public class Cyberwire extends Activity implements OnClickListener {
     		Intent i = new Intent(this, AddProvider.class);
     		startActivity(i);
     		return true;
-    	case R.id.exit:
+    	case R.id.reset:
+        	this.deleteDatabase("providers.db");
+    		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+    		SharedPreferences.Editor editor = prefs.edit();
+    		editor.remove("assetProviderPref");
+    		editor.commit();
+    		Toast toast = Toast.makeText(this, "App database cleared!", Toast.LENGTH_LONG);
+    		toast.setGravity(Gravity.CENTER, 0, 0);
+    		toast.show();
     		return true;
     	case R.id.settings:
     		startActivity(new Intent(this, Prefs.class));

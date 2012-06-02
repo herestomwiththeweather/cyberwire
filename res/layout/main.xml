@@ -3,12 +3,19 @@
     android:background="@color/background"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
-    android:orientation="horizontal" >
-        <Button
+    android:orientation="vertical"
+    android:gravity="center"
+    android:padding="10dip">
+    <Button
         xmlns:android="http://schemas.android.com/apk/res/android"
         android:id="@+id/assetname_button"
-        android:layout_width="112dp"
+        android:layout_width="144dp"
         android:layout_height="48dp" />
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:background="@color/background"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:orientation="horizontal" >
    <ImageButton
       android:id="@+id/send_button"
       android:contentDescription="@string/send_desc"
@@ -37,4 +44,5 @@
       android:layout_width="96dp"
       android:layout_height="96dp"
       android:src="@drawable/details" />
+   </LinearLayout>
 </LinearLayout>

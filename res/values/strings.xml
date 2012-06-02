@@ -4,7 +4,7 @@
    <string name="app_name">Cyberwire</string>
    <string name="addprovider_label">Add Provider</string>
    <string name="settings_label">Settings</string>
-   <string name="exit_label">Exit</string>
+   <string name="reset_label">Reset</string>
    
    <string name="profile_desc">Profile</string>
    <string name="send_desc">Send</string>

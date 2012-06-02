@@ -353,6 +353,7 @@ public class AddProvider extends Activity implements OnClickListener {
     			Log.d(TAG,"onReceive WALLET!!!");
     			addAssets(context,intent,m_Provider);
     			finish();
+        		startActivity(new Intent(context, Prefs.class));
     		}
     		else {
         		Log.d(TAG,"XXX unrecognized action for AddProvider");
