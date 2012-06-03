@@ -18,6 +18,7 @@ public class Provider {
 	public String redirectUrl;
 	public String clientId;
 	public String clientSecret;
+	public String authorizationEndpoint;
 	
 	private ProviderData m_providers;
 	
@@ -47,6 +48,10 @@ public class Provider {
 	
 	public void setClientSecret(String client_secret) {
 		clientSecret = client_secret;
+	}
+	
+	public void setAuthorizationEndpoint(String authorization_endpoint) {
+		authorizationEndpoint = authorization_endpoint;
 	}
 	
 	public void addAccessToken(String token, Integer expires_in, String refresh_token) {

@@ -7,6 +7,7 @@ import static org.opensourcecurrency.hack.ConstantsProviders.PROVIDER_URL;
 import static org.opensourcecurrency.hack.ConstantsProviders.REDIRECT_URL;
 import static org.opensourcecurrency.hack.ConstantsProviders.CLIENT_ID;
 import static org.opensourcecurrency.hack.ConstantsProviders.CLIENT_SECRET;
+import static org.opensourcecurrency.hack.ConstantsProviders.AUTHORIZATION_ENDPOINT;
 import static org.opensourcecurrency.hack.ConstantsProviders.PROVIDER_CREATED_AT;
 
 import java.text.SimpleDateFormat;
@@ -60,7 +61,7 @@ public class ProviderData extends SQLiteOpenHelper {
 	private static final int DATABASE_VERSION = 1;
 	private static final String TAG = "OpenTransact";
 
-	private static String[] FROM = { _ID, NAME,PROVIDER_URL,REDIRECT_URL,CLIENT_ID,CLIENT_SECRET,PROVIDER_CREATED_AT };
+	private static String[] FROM = { _ID, NAME,PROVIDER_URL,REDIRECT_URL,CLIENT_ID,CLIENT_SECRET,AUTHORIZATION_ENDPOINT,PROVIDER_CREATED_AT };
 	private static String[] TOKENS_FROM = { _ID, ACCESS_TOKEN_PROVIDER_ID,REFRESH_TOKEN_ID,ACCESS_TOKEN,ACCESS_TOKEN_EXPIRES_AT,ACCESS_TOKEN_CREATED_AT };
     private static String[] ASSETS_FROM = { _ID, ASSET_PROVIDER_ID, ASSET_URL, ASSET_NAME, ASSET_BALANCE, ASSET_CREATED_AT };
     private static String[] USERS_FROM = { _ID, USER_PROVIDER_ID, USER_URL, USER_WEBSITE_URL, USER_PICTURE_URL, USER_NAME, USER_EMAIL, USER_USER_ID, USER_CREATED_AT };
@@ -79,6 +80,7 @@ public class ProviderData extends SQLiteOpenHelper {
 	              + " TEXT UNIQUE NOT NULL, " + REDIRECT_URL
 	              + " TEXT NOT NULL, " + CLIENT_ID
 	              + " TEXT NOT NULL, " + CLIENT_SECRET
+	              + " TEXT NOT NULL, " + AUTHORIZATION_ENDPOINT
 	              + " TEXT NOT NULL," + PROVIDER_CREATED_AT + " DATE);");
 	      
 	      db.execSQL("CREATE TABLE " + USERS_TABLE_NAME + " (" + _ID
@@ -134,6 +136,7 @@ public class ProviderData extends SQLiteOpenHelper {
 	            ob.setRedirectUrl(cursor.getString(cursor.getColumnIndex(REDIRECT_URL)));
 	            ob.setClientId(cursor.getString(cursor.getColumnIndex(CLIENT_ID)));
 	            ob.setClientSecret(cursor.getString(cursor.getColumnIndex(CLIENT_SECRET)));
+	            ob.setAuthorizationEndpoint(cursor.getString(cursor.getColumnIndex(AUTHORIZATION_ENDPOINT)));
 	            resultList.add(ob);
 	        } catch (Exception e) {
       			e.printStackTrace();
@@ -205,7 +208,7 @@ public class ProviderData extends SQLiteOpenHelper {
     	return provider;
     }
     
-	public Provider addProvider(String name, String provider_url, String redirect_url, String client_id, String client_secret) {
+	public Provider addProvider(String name, String provider_url, String redirect_url, String client_id, String client_secret, String authorization_endpoint) {
     	Log.d(TAG,"ProviderData#addProvider: " + name);
 
 		SQLiteDatabase db = getWritableDatabase();
@@ -215,6 +218,7 @@ public class ProviderData extends SQLiteOpenHelper {
 		values.put(REDIRECT_URL, redirect_url);
 		values.put(CLIENT_ID, client_id);
 		values.put(CLIENT_SECRET, client_secret);
+		values.put(AUTHORIZATION_ENDPOINT, authorization_endpoint);
 		SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 		values.put(PROVIDER_CREATED_AT, dateFormat.format(new Date()));
 		

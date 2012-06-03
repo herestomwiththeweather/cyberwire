@@ -123,6 +123,7 @@ public class Cyberwire extends Activity implements OnClickListener {
     		SharedPreferences.Editor editor = prefs.edit();
     		editor.remove("assetProviderPref");
     		editor.commit();
+            btn.setText("No asset");
     		Toast toast = Toast.makeText(this, "App database cleared!", Toast.LENGTH_LONG);
     		toast.setGravity(Gravity.CENTER, 0, 0);
     		toast.show();
