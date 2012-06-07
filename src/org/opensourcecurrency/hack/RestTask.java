@@ -14,10 +14,12 @@ import android.util.Log;
 public class RestTask extends AsyncTask<HttpUriRequest, Void, String> {
 
     public static final String HTTP_RESPONSE = "httpResponse";
-
+    public static final String HTTP_ERROR = "httpError";
+	
     private Context mContext;
     private HttpClient mClient;
     private String mAction;
+    private String mHttpErrorMessage;
 	
     public RestTask(Context context, String action) {
         mContext = context;
@@ -36,11 +38,11 @@ public class RestTask extends AsyncTask<HttpUriRequest, Void, String> {
         try{
             HttpUriRequest request = params[0];
             HttpResponse serverResponse = mClient.execute(request);
-			
             BasicResponseHandler handler = new BasicResponseHandler();
             String response = handler.handleResponse(serverResponse);
             return response;
         } catch (Exception e) {
+        	mHttpErrorMessage = e.getMessage();
             e.printStackTrace();
             return null;
         }
@@ -51,6 +53,9 @@ public class RestTask extends AsyncTask<HttpUriRequest, Void, String> {
 
         Intent intent = new Intent(mAction);
         intent.putExtra(HTTP_RESPONSE, result);
+        if(null==result) {
+        	intent.putExtra(HTTP_ERROR,mHttpErrorMessage);
+        }
         //Broadcast the completion
         mContext.sendBroadcast(intent);
     }

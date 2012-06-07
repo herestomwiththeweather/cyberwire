@@ -1,26 +1,19 @@
 package org.opensourcecurrency.hack;
 
-import static org.opensourcecurrency.hack.ConstantsProviders.PROVIDER_URL;
 import android.app.ProgressDialog;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.app.ListActivity;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.SharedPreferences;
 import android.util.Log;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
-import java.net.URI;
-import java.util.ArrayList;
 import android.view.Gravity;
 import android.widget.Toast;
-
-import org.apache.http.client.methods.HttpGet;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -31,6 +24,7 @@ public class Transactions extends ListActivity {
 	TextView selection;
 	private static final String OAUTH_LISTPAYMENTS_ACTION = "org.opensourcecurrency.hack.OAUTH_LISTPAYMENTS";
 	private static final String OAUTH_LISTPAYMENTS_USER_ACTION = "org.opensourcecurrency.hack.OAUTH_LISTPAYMENTS_USER";
+	private static final String OAUTH_LISTPAYMENTS_REFRESH_ACTION = "org.opensourcecurrency.hack.OAUTH_LISTPAYMENTS_REFRESH";
 	private static final String TAG = "OpenTransact";
 	private ProviderData providers;
 	private ProgressDialog progress;
@@ -61,6 +55,7 @@ public class Transactions extends ListActivity {
         	progress = ProgressDialog.show(this, "Fetching profile", "Waiting...", true);
 		} else {
 			m_Asset.getTransactions(this, OAUTH_LISTPAYMENTS_ACTION);
+    		Log.d(TAG,"XXX Transactions#onCreate getTransactions request sent! ");
         	progress = ProgressDialog.show(this, "Fetching Transactions", "Waiting...", true);
 		}
 	}
@@ -74,6 +69,7 @@ public class Transactions extends ListActivity {
       super.onResume();
       registerReceiver(receiver, new IntentFilter(OAUTH_LISTPAYMENTS_ACTION));
       registerReceiver(receiver, new IntentFilter(OAUTH_LISTPAYMENTS_USER_ACTION));
+      registerReceiver(receiver, new IntentFilter(OAUTH_LISTPAYMENTS_REFRESH_ACTION));
     }
     
     @Override
@@ -122,10 +118,11 @@ public class Transactions extends ListActivity {
     		Log.d(TAG,"response(Transactions): "+response);
     		
     		if(null == response) {
-	    		Toast toast = Toast.makeText(context, "Error retrieving transactions", Toast.LENGTH_LONG);
-	    		toast.setGravity(Gravity.CENTER, 0, 0);
-	    		toast.show();
-    			return;
+    				boolean fRefresh = m_Provider.handleNetworkError(context, intent, OAUTH_LISTPAYMENTS_REFRESH_ACTION);
+    				if(fRefresh) {
+    		          	progress = ProgressDialog.show(context, "Refreshing token", "Waiting...", true);
+    				}
+    				return;
     		}
     		
     		if(intent.getAction().equals(OAUTH_LISTPAYMENTS_ACTION)) {
@@ -157,9 +154,17 @@ public class Transactions extends ListActivity {
         		
     			m_Asset.getTransactions(context, OAUTH_LISTPAYMENTS_ACTION);
             	progress = ProgressDialog.show(context, "Fetching Transactions", "Waiting...", true);
+    		} else if(intent.getAction().equals(OAUTH_LISTPAYMENTS_REFRESH_ACTION)) {
+				String token = m_Provider.addAccessToken(context,intent);
+				if(null == m_Provider.getUser()) {
+					m_Provider.getUserInfo(context, OAUTH_LISTPAYMENTS_USER_ACTION);
+		        	progress = ProgressDialog.show(context, "Fetching profile", "Waiting...", true);
+				} else {
+					m_Asset.getTransactions(context, OAUTH_LISTPAYMENTS_ACTION);
+		    		Log.d(TAG,"XXX Transactions#onCreate getTransactions request sent! ");
+		        	progress = ProgressDialog.show(context, "Fetching Transactions", "Waiting...", true);
+				}
     		}
-
-
     	}
     };
 }

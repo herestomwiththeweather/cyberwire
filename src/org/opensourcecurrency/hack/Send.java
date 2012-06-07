@@ -34,6 +34,8 @@ import android.util.Log;
 
 public class Send extends Activity implements OnClickListener {
 	private static final String OAUTH_PAYMENT_ACTION = "org.opensourcecurrency.hack.OAUTH_PAYMENT";
+	private static final String OAUTH_PAYMENT_REFRESH_ACTION = "org.opensourcecurrency.hack.OAUTH_PAYMENT_REFRESH";
+
 
 	private static final String TAG = "OpenTransact";
 	private ProviderData providers;
@@ -87,27 +89,13 @@ public class Send extends Activity implements OnClickListener {
         }
     	
     	switch (view.getId()) {
-    	case R.id.pay_button:
-            //Log.d(TAG,"onClick:     to=" + toText.getText().toString());
-            //Log.d(TAG,"onClick: amount=" + amountText.getText().toString());
-            //Log.d(TAG,"onClick:   note=" + noteText.getText().toString());        	
-          	try {
-          		HttpPost paymentRequest = new HttpPost(new URI(m_Asset.url));
-          		paymentRequest.setHeader("Accept","application/json");
-          		paymentRequest.setHeader("Authorization","Bearer " + access_token);
-        		List<NameValuePair> parameters = new ArrayList<NameValuePair>();
-        		parameters.add(new BasicNameValuePair("to", toText.getText().toString()));
-        		parameters.add(new BasicNameValuePair("amount", amountText.getText().toString()));
-        		parameters.add(new BasicNameValuePair("note", noteText.getText().toString()));
-        		paymentRequest.setEntity(new UrlEncodedFormEntity(parameters));
-        		
-        		RestTask task = new RestTask(this, OAUTH_PAYMENT_ACTION);
-        		task.execute(paymentRequest);
-            	progress = ProgressDialog.show(this, "Making payment", "Waiting...", true);
-
-          	} catch (Exception e) {
-      			e.printStackTrace();
-          	}
+    	case R.id.pay_button:      
+    		m_Asset.postTransaction(this, 
+    				                toText.getText().toString(), 
+    				                amountText.getText().toString(),
+    				                noteText.getText().toString(),
+    				                OAUTH_PAYMENT_ACTION);
+        	progress = ProgressDialog.show(this, "Making payment", "Waiting...", true);
     		break;
     	}
     }
@@ -116,6 +104,7 @@ public class Send extends Activity implements OnClickListener {
     public void onResume() {
       super.onResume();
       registerReceiver(receiver, new IntentFilter(OAUTH_PAYMENT_ACTION));
+      registerReceiver(receiver, new IntentFilter(OAUTH_PAYMENT_REFRESH_ACTION));
     }
     
     @Override
@@ -135,20 +124,30 @@ public class Send extends Activity implements OnClickListener {
     		Log.d(TAG,"response(Send): "+response);
     		
     		if(null == response) {
-	    		Toast toast = Toast.makeText(context, "Error making payment", Toast.LENGTH_LONG);
-	    		toast.setGravity(Gravity.CENTER, 0, 0);
-	    		toast.show();
-    			return;
+				boolean fRefresh = m_Provider.handleNetworkError(context, intent, OAUTH_PAYMENT_REFRESH_ACTION);
+				if(fRefresh) {
+		          	progress = ProgressDialog.show(context, "Refreshing token", "Waiting...", true);
+				}
+				return;
     		}
 
-    		try {
-              JSONObject payment_response = new JSONObject(response);
-    		} catch (JSONException e) {
-    		  e.printStackTrace();
+    		if(intent.getAction().equals(OAUTH_PAYMENT_ACTION)) {
+        		try {
+                    JSONObject payment_response = new JSONObject(response);
+          		} catch (JSONException e) {
+          		  e.printStackTrace();
+          		}
+          		
+      			finish();
+    		} else if(intent.getAction().equals(OAUTH_PAYMENT_REFRESH_ACTION)) {
+				String token = m_Provider.addAccessToken(context,intent);
+        		m_Asset.postTransaction(context, 
+		                toText.getText().toString(), 
+		                amountText.getText().toString(),
+		                noteText.getText().toString(),
+		                OAUTH_PAYMENT_ACTION);
+        				progress = ProgressDialog.show(context, "Retrying payment", "Waiting...", true);
     		}
-    		
-			finish();
-
     	}
     };
 }

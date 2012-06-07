@@ -11,5 +11,6 @@ public interface ConstantsProviders extends BaseColumns {
 	public static final String CLIENT_ID = "client_id";
 	public static final String CLIENT_SECRET = "client_secret";
 	public static final String AUTHORIZATION_ENDPOINT = "auth_endpoint";
+	public static final String TOKEN_ENDPOINT = "token_endpoint";
 	public static final String PROVIDER_CREATED_AT = "created_at";
 }

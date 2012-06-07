@@ -124,7 +124,7 @@ public class AddProvider extends Activity implements OnClickListener {
         	Log.d(TAG,"onActivityResult redirect_uri: " + redirect_url);
         	
        		try {
-      		  String url = provider_url + "/oauth/token";
+       		  String url = m_Provider.tokenEndpoint;
       		  HttpPost tokenRequest = new HttpPost(new URI(url));
       		  List<NameValuePair> parameters = new ArrayList<NameValuePair>();
       		  parameters.add(new BasicNameValuePair("client_id", client_id));
@@ -226,7 +226,8 @@ public class AddProvider extends Activity implements OnClickListener {
 			                                     clientRegistration.getString("redirect_url"), 
 			                                     clientRegistration.getString("client_id"), 
 			                                     clientRegistration.getString("client_secret"),
-			                                     m_AssetProvider + "/oauth/authorize"); // XXX hardcode authorization endpoint for now
+			                                     m_AssetProvider + "/oauth/authorize",
+			                                     m_AssetProvider + "/oauth/token"); // XXX hardcode authorization endpoint for now
     		}catch (JSONException e) {
       		    e.printStackTrace();
     			provider = providers.getProvider(m_AssetProvider);
@@ -238,36 +239,7 @@ public class AddProvider extends Activity implements OnClickListener {
     		return provider;
     	}
     	
-        String addAccessToken(Context context, Intent intent, Provider provider) {
-    		String response = intent.getStringExtra(RestTask.HTTP_RESPONSE);
-    		Log.d(TAG,"response: "+response);
-    		
-    		String access_token = null;
-    		
-    		if(null == response) {
-    			return "";
-    		}
 
-    		try {
-              JSONObject access_token_response = new JSONObject(response);
-          	  access_token = access_token_response.getString("access_token");
-          	  Log.d(TAG," access token: " + access_token);
-          	  provider.addAccessToken(access_token, 0, "");
-
-          	  //String refresh_token = access_token_response.getString("refresh_token");
-          	  //String expires_in = access_token_response.getString("expires_in");
-
-          	  //Log.d(TAG,"refresh token: " + refresh_token);
-          	  //Log.d(TAG,"   expires_in: " + expires_in);
-
-
-      		} catch (JSONException e) {
-      		  e.printStackTrace();
-      		  return "";
-      		}
-    		
-        	return access_token;
-        }
         
         private void getWallet(Context context, String access_token, Provider provider) {
         	String wallet_path = "/wallet";
@@ -354,7 +326,7 @@ public class AddProvider extends Activity implements OnClickListener {
             	startWebView(context);
     		} else if(intent.getAction().equals(OAUTH_TOKEN_ACTION)) {
     			String token = null;
-    			token = addAccessToken(context,intent,m_Provider);
+    			token = m_Provider.addAccessToken(context,intent);
     			if(token.equals("")) {
     				Log.d(TAG,"addAccessToken failed!");
     			} else {

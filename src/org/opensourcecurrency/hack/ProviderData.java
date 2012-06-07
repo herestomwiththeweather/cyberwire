@@ -8,6 +8,7 @@ import static org.opensourcecurrency.hack.ConstantsProviders.REDIRECT_URL;
 import static org.opensourcecurrency.hack.ConstantsProviders.CLIENT_ID;
 import static org.opensourcecurrency.hack.ConstantsProviders.CLIENT_SECRET;
 import static org.opensourcecurrency.hack.ConstantsProviders.AUTHORIZATION_ENDPOINT;
+import static org.opensourcecurrency.hack.ConstantsProviders.TOKEN_ENDPOINT;
 import static org.opensourcecurrency.hack.ConstantsProviders.PROVIDER_CREATED_AT;
 
 import java.text.SimpleDateFormat;
@@ -39,6 +40,7 @@ import static org.opensourcecurrency.hack.ConstantsAccessTokens.ACCESS_TOKEN_EXP
 import static org.opensourcecurrency.hack.ConstantsAccessTokens.ACCESS_TOKEN_CREATED_AT;
 
 import static org.opensourcecurrency.hack.ConstantsRefreshTokens.REFRESH_TOKENS_TABLE_NAME;
+import static org.opensourcecurrency.hack.ConstantsRefreshTokens.REFRESH_TOKEN_PROVIDER_ID;
 import static org.opensourcecurrency.hack.ConstantsRefreshTokens.REFRESH_TOKEN;
 import static org.opensourcecurrency.hack.ConstantsRefreshTokens.REFRESH_TOKEN_EXPIRES_AT;
 import static org.opensourcecurrency.hack.ConstantsRefreshTokens.REFRESH_TOKEN_CREATED_AT;
@@ -61,10 +63,11 @@ public class ProviderData extends SQLiteOpenHelper {
 	private static final int DATABASE_VERSION = 1;
 	private static final String TAG = "OpenTransact";
 
-	private static String[] FROM = { _ID, NAME,PROVIDER_URL,REDIRECT_URL,CLIENT_ID,CLIENT_SECRET,AUTHORIZATION_ENDPOINT,PROVIDER_CREATED_AT };
+	private static String[] FROM = { _ID, NAME,PROVIDER_URL,REDIRECT_URL,CLIENT_ID,CLIENT_SECRET,AUTHORIZATION_ENDPOINT,TOKEN_ENDPOINT,PROVIDER_CREATED_AT };
 	private static String[] TOKENS_FROM = { _ID, ACCESS_TOKEN_PROVIDER_ID,REFRESH_TOKEN_ID,ACCESS_TOKEN,ACCESS_TOKEN_EXPIRES_AT,ACCESS_TOKEN_CREATED_AT };
     private static String[] ASSETS_FROM = { _ID, ASSET_PROVIDER_ID, ASSET_URL, ASSET_NAME, ASSET_BALANCE, ASSET_CREATED_AT };
     private static String[] USERS_FROM = { _ID, USER_PROVIDER_ID, USER_URL, USER_WEBSITE_URL, USER_PICTURE_URL, USER_NAME, USER_EMAIL, USER_USER_ID, USER_CREATED_AT };
+    private static String[] REFRESHTOKENS_FROM = { _ID, REFRESH_TOKEN, REFRESH_TOKEN_CREATED_AT };
     
 	public ProviderData(Context ctx) {
 	      super(ctx, DATABASE_NAME, null, DATABASE_VERSION);
@@ -81,6 +84,7 @@ public class ProviderData extends SQLiteOpenHelper {
 	              + " TEXT NOT NULL, " + CLIENT_ID
 	              + " TEXT NOT NULL, " + CLIENT_SECRET
 	              + " TEXT NOT NULL, " + AUTHORIZATION_ENDPOINT
+	              + " TEXT NOT NULL, " + TOKEN_ENDPOINT
 	              + " TEXT NOT NULL," + PROVIDER_CREATED_AT + " DATE);");
 	      
 	      db.execSQL("CREATE TABLE " + USERS_TABLE_NAME + " (" + _ID
@@ -108,7 +112,8 @@ public class ProviderData extends SQLiteOpenHelper {
 	              + " DATE, " + ACCESS_TOKEN_CREATED_AT + " DATE);");
 	      
 	      db.execSQL("CREATE TABLE " + REFRESH_TOKENS_TABLE_NAME + " (" + _ID
-	              + " INTEGER PRIMARY KEY AUTOINCREMENT, " + REFRESH_TOKEN
+	              + " INTEGER PRIMARY KEY AUTOINCREMENT, " + REFRESH_TOKEN_PROVIDER_ID
+	              + " INTEGER, " + REFRESH_TOKEN
 	              + " TEXT NOT NULL," + REFRESH_TOKEN_EXPIRES_AT
 	              + " DATE, " + REFRESH_TOKEN_CREATED_AT + " DATE);");
 	}
@@ -137,6 +142,7 @@ public class ProviderData extends SQLiteOpenHelper {
 	            ob.setClientId(cursor.getString(cursor.getColumnIndex(CLIENT_ID)));
 	            ob.setClientSecret(cursor.getString(cursor.getColumnIndex(CLIENT_SECRET)));
 	            ob.setAuthorizationEndpoint(cursor.getString(cursor.getColumnIndex(AUTHORIZATION_ENDPOINT)));
+	            ob.setTokenEndpoint(cursor.getString(cursor.getColumnIndex(TOKEN_ENDPOINT)));
 	            resultList.add(ob);
 	        } catch (Exception e) {
       			e.printStackTrace();
@@ -208,7 +214,7 @@ public class ProviderData extends SQLiteOpenHelper {
     	return provider;
     }
     
-	public Provider addProvider(String name, String provider_url, String redirect_url, String client_id, String client_secret, String authorization_endpoint) {
+	public Provider addProvider(String name, String provider_url, String redirect_url, String client_id, String client_secret, String authorization_endpoint, String token_endpoint) {
     	Log.d(TAG,"ProviderData#addProvider: " + name);
 
 		SQLiteDatabase db = getWritableDatabase();
@@ -219,6 +225,7 @@ public class ProviderData extends SQLiteOpenHelper {
 		values.put(CLIENT_ID, client_id);
 		values.put(CLIENT_SECRET, client_secret);
 		values.put(AUTHORIZATION_ENDPOINT, authorization_endpoint);
+		values.put(TOKEN_ENDPOINT, token_endpoint);
 		SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 		values.put(PROVIDER_CREATED_AT, dateFormat.format(new Date()));
 		
@@ -233,7 +240,7 @@ public class ProviderData extends SQLiteOpenHelper {
 		SQLiteDatabase db = getReadableDatabase();
 	    ArrayList<AccessToken> resultList = new ArrayList<AccessToken>();
 
-		Cursor cursor = db.query(ACCESS_TOKENS_TABLE_NAME, TOKENS_FROM, selection, selectionArgs, null, null, null);
+		Cursor cursor = db.query(ACCESS_TOKENS_TABLE_NAME, TOKENS_FROM, selection, selectionArgs, null, null, "created_at DESC");
     	Log.d(TAG,"XXX ProviderData#getAccessTokens count: " + cursor.getCount());
 	    while (cursor.moveToNext())
 	    {			
@@ -241,6 +248,7 @@ public class ProviderData extends SQLiteOpenHelper {
 	            AccessToken ob = new AccessToken();
 	            ob.setId(cursor.getInt(cursor.getColumnIndex(_ID)));
 	            ob.setToken(cursor.getString(cursor.getColumnIndex(ACCESS_TOKEN)));
+	            ob.setRefreshTokenId(cursor.getInt(cursor.getColumnIndex(REFRESH_TOKEN_ID)));
 	            resultList.add(ob);
 	        } catch (Exception e) {
       			e.printStackTrace();
@@ -297,6 +305,30 @@ public class ProviderData extends SQLiteOpenHelper {
     	return user;
 	}
 	
+	public String getRefreshToken(Integer refresh_token_id) {
+		Log.d(TAG,"XXX getRefreshToken() refresh_token_id: " + refresh_token_id);
+    	String refreshToken = "";
+    	
+    	SQLiteDatabase db = getReadableDatabase();
+
+		Cursor cursor = db.query(REFRESH_TOKENS_TABLE_NAME, REFRESHTOKENS_FROM, _ID + " = ?", new String[] {refresh_token_id.toString()}, null, null, null);
+    	Log.d(TAG,"XXX ProviderData#getRefreshToken count: " + cursor.getCount());
+	    while (cursor.moveToNext())
+	    {			
+	        try {
+	        	refreshToken = cursor.getString(cursor.getColumnIndex(REFRESH_TOKEN));
+	    		Log.d(TAG,"XXX getRefreshToken() refresh_token: " + refreshToken);
+	        } catch (Exception e) {
+      			e.printStackTrace();
+	        }
+	    }
+
+	    cursor.close();
+	    db.close();
+
+	    return refreshToken;
+	}
+	
     public AccessToken getAccessToken(Integer provider_id) {
 		Log.d(TAG,"XXX getAccessToken: " + provider_id);
 		
@@ -308,6 +340,9 @@ public class ProviderData extends SQLiteOpenHelper {
     	} finally {
     		close();
     	}
+    	
+		Log.d(TAG,"XXX getAccessToken: access_tokens.size():" + access_tokens.size());
+		
     	if(0 == access_tokens.size()) {
     		access_token = null;
     	} else {
@@ -336,6 +371,22 @@ public class ProviderData extends SQLiteOpenHelper {
 		
 		//values.put(PROVIDER_CREATED_AT, System.currentTimeMillis());
 		db.insertOrThrow(ACCESS_TOKENS_TABLE_NAME, null, values);
+	}
+	
+	public Integer addRefreshToken(Integer provider_id, String refresh_token) {
+		Log.d(TAG,"ProviderData#addRefreshToken  provider_id: " + provider_id);
+		Log.d(TAG,"ProviderData#addRefreshToken refresh_token: " + refresh_token);
+		
+		SQLiteDatabase db = getWritableDatabase();
+		ContentValues values = new ContentValues();
+		
+		values.put(REFRESH_TOKEN_PROVIDER_ID, provider_id);
+		values.put(REFRESH_TOKEN, refresh_token);
+		
+		SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+		values.put(REFRESH_TOKEN_CREATED_AT, dateFormat.format(new Date()));
+		
+		return((int)db.insertOrThrow(REFRESH_TOKENS_TABLE_NAME, null, values));
 	}
 	
 	public ArrayList<Asset> getAssets(String selection, String [] selectionArgs) {
