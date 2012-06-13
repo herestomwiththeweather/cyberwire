@@ -20,6 +20,8 @@ import org.opensourcecurrency.hack.RestTask;
 
 import android.util.Log;
 
+import org.opensourcecurrency.hack.model.Asset;
+import org.opensourcecurrency.hack.model.Provider;
 
 public class Send extends Activity implements OnClickListener {
 	private static final String OAUTH_PAYMENT_ACTION = "org.opensourcecurrency.hack.OAUTH_PAYMENT";

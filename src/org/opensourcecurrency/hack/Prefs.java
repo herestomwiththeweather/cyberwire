@@ -13,6 +13,7 @@ import android.preference.ListPreference;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.util.Log;
 
+import org.opensourcecurrency.hack.model.Asset;
 
 public class Prefs extends PreferenceActivity implements OnSharedPreferenceChangeListener {
 	private static final String TAG = "OpenTransact";

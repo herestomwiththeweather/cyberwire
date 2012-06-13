@@ -20,6 +20,9 @@ import org.json.JSONObject;
 import org.json.JSONArray;
 import org.opensourcecurrency.hack.RestTask;
 
+import org.opensourcecurrency.hack.model.Asset;
+import org.opensourcecurrency.hack.model.Provider;
+
 public class Transactions extends ListActivity {    
 	TextView selection;
 	private static final String OAUTH_LISTPAYMENTS_ACTION = "org.opensourcecurrency.hack.OAUTH_LISTPAYMENTS";

@@ -13,11 +13,11 @@ import com.j256.ormlite.dao.Dao;
 import com.j256.ormlite.support.ConnectionSource;
 import com.j256.ormlite.table.TableUtils;
 
-import org.opensourcecurrency.hack.Asset;
-import org.opensourcecurrency.hack.Provider;
-import org.opensourcecurrency.hack.AccessToken;
-import org.opensourcecurrency.hack.RefreshToken;
-import org.opensourcecurrency.hack.User;
+import org.opensourcecurrency.hack.model.Asset;
+import org.opensourcecurrency.hack.model.Provider;
+import org.opensourcecurrency.hack.model.AccessToken;
+import org.opensourcecurrency.hack.model.RefreshToken;
+import org.opensourcecurrency.hack.model.User;
 
 public class DatabaseHelper extends OrmLiteSqliteOpenHelper {
 	// name of the database file for your application -- change to something appropriate for your app

@@ -14,6 +14,10 @@ import android.util.Log;
 import android.view.Gravity;
 import android.widget.Toast;
 
+import org.opensourcecurrency.hack.model.Asset;
+import org.opensourcecurrency.hack.model.User;
+import org.opensourcecurrency.hack.model.Provider;
+
 public class Profile extends Activity {
 	
 	private static final String PROFILE_ACTION = "org.opensourcecurrency.hack.PROFILE";

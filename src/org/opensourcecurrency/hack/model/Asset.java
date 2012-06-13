@@ -1,4 +1,4 @@
-package org.opensourcecurrency.hack;
+package org.opensourcecurrency.hack.model;
 
 import java.net.URI;
 import java.util.ArrayList;
@@ -22,6 +22,7 @@ import com.j256.ormlite.field.DatabaseField;
 import com.j256.ormlite.table.DatabaseTable;
 
 import org.opensourcecurrency.hack.db.DatabaseManager;
+import org.opensourcecurrency.hack.RestTask;
 
 @DatabaseTable
 public class Asset {

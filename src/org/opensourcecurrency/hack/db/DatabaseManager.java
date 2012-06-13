@@ -7,11 +7,11 @@ import java.util.List;
 
 import android.content.Context;
 
-import org.opensourcecurrency.hack.Asset;
-import org.opensourcecurrency.hack.Provider;
-import org.opensourcecurrency.hack.AccessToken;
-import org.opensourcecurrency.hack.RefreshToken;
-import org.opensourcecurrency.hack.User;
+import org.opensourcecurrency.hack.model.Asset;
+import org.opensourcecurrency.hack.model.Provider;
+import org.opensourcecurrency.hack.model.AccessToken;
+import org.opensourcecurrency.hack.model.RefreshToken;
+import org.opensourcecurrency.hack.model.User;
 
 public class DatabaseManager {
 

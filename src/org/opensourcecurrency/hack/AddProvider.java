@@ -36,6 +36,8 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import org.opensourcecurrency.hack.model.Provider;
+
 import android.util.Log;
 
 public class AddProvider extends Activity implements OnClickListener {

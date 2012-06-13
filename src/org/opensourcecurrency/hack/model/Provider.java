@@ -1,4 +1,4 @@
-package org.opensourcecurrency.hack;
+package org.opensourcecurrency.hack.model;
 
 import java.net.URI;
 import java.text.SimpleDateFormat;
@@ -20,6 +20,7 @@ import com.j256.ormlite.field.ForeignCollectionField;
 import com.j256.ormlite.table.DatabaseTable;
 
 import org.opensourcecurrency.hack.db.DatabaseManager;
+import org.opensourcecurrency.hack.RestTask;
 
 import android.content.Context;
 import android.content.Intent;

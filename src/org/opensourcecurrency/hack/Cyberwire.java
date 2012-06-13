@@ -21,6 +21,7 @@ import android.view.MenuItem;
 import android.widget.Button;
 import android.widget.Toast;
 
+import org.opensourcecurrency.hack.model.Asset;
 import org.opensourcecurrency.hack.db.DatabaseManager;
 
 public class Cyberwire extends Activity implements OnClickListener {
