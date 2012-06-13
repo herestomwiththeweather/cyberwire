@@ -1,14 +1,12 @@
 package org.opensourcecurrency.hack;
 
-import java.util.List;
-
 import com.j256.ormlite.field.DatabaseField;
 import com.j256.ormlite.table.DatabaseTable;
 
 import org.opensourcecurrency.hack.db.DatabaseManager;
 
 @DatabaseTable
-public class AccessToken {
+public class RefreshToken {
 	@DatabaseField(generatedId=true)
 	public int id;
 	
@@ -18,29 +16,22 @@ public class AccessToken {
 	@DatabaseField(foreign=true,foreignAutoRefresh=true)
 	public Provider provider;
 	
-	@DatabaseField(foreign=true,foreignAutoRefresh=true)
-	public RefreshToken refresh_token;
-	
 	@DatabaseField
 	public String expires_at;
 	
 	@DatabaseField
 	public String created_at;
 	
-	static public List<AccessToken> all() {
-		return DatabaseManager.getInstance().getAllAccessTokens();
-	}
-	
-	static public AccessToken create() {
-		return DatabaseManager.getInstance().newAccessToken();
+	static public RefreshToken create() {
+		return DatabaseManager.getInstance().newRefreshToken();
 	}
 	
 	public boolean save() {
-		DatabaseManager.getInstance().updateAccessToken(this);
+		DatabaseManager.getInstance().updateRefreshToken(this);
 		return true;
 	}
 	
 	public void destroy() {
-		DatabaseManager.getInstance().deleteAccessToken(this);
+		DatabaseManager.getInstance().deleteRefreshToken(this);
 	}
 }

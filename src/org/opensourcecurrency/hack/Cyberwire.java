@@ -21,14 +21,13 @@ import android.view.MenuItem;
 import android.widget.Button;
 import android.widget.Toast;
 
-
+import org.opensourcecurrency.hack.db.DatabaseManager;
 
 public class Cyberwire extends Activity implements OnClickListener {
 	private static final String TAG = "OpenTransact";
 	private static final String PREFCHANGE_ACTION = "org.opensourcecurrency.hack.PREF_CHANGE";
 	
 	Button btn;
-	ProviderData providers;
 	Asset m_Asset = null;
 	
     /** Called when the activity is first created. */
@@ -37,10 +36,10 @@ public class Cyberwire extends Activity implements OnClickListener {
     	Log.d(TAG,"Cyberwire#onCreate");
 		
         super.onCreate(savedInstanceState);
+        DatabaseManager.init(this);
         setContentView(R.layout.main);
         
-		providers = new ProviderData(this);
-	    m_Asset = providers.getCurrentAsset(this);
+	    m_Asset = Asset.getCurrentAsset(this);
 		
         btn = (Button)findViewById(R.id.assetname_button);
         if(null == m_Asset) {
@@ -89,7 +88,7 @@ public class Cyberwire extends Activity implements OnClickListener {
     
     private BroadcastReceiver receiver = new BroadcastReceiver() {
     	public void onReceive(Context context, Intent intent) {
-    	    m_Asset = providers.getCurrentAsset(context);
+    	    m_Asset = Asset.getCurrentAsset(context);
     		
             btn = (Button)findViewById(R.id.assetname_button);
             if(null == m_Asset) {
@@ -118,7 +117,7 @@ public class Cyberwire extends Activity implements OnClickListener {
     		startActivity(i);
     		return true;
     	case R.id.reset:
-        	this.deleteDatabase("providers.db");
+        	this.deleteDatabase("providers.sqlite");
     		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
     		SharedPreferences.Editor editor = prefs.edit();
     		editor.remove("assetProviderPref");

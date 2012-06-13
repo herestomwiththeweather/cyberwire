@@ -10,21 +10,45 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.message.BasicNameValuePair;
 
-import android.app.ProgressDialog;
 import android.util.Log;
 import android.view.Gravity;
 import android.widget.Toast;
 import android.content.Context;
 
+import android.content.SharedPreferences;
+import android.preference.PreferenceManager;
+
+import com.j256.ormlite.field.DatabaseField;
+import com.j256.ormlite.table.DatabaseTable;
+
+import org.opensourcecurrency.hack.db.DatabaseManager;
+
+@DatabaseTable
 public class Asset {
-	public Integer assetId;
-	public String url;
+	@DatabaseField(generatedId=true)
+	public int id;
+	
+	@DatabaseField
 	public String name;
+	
+	@DatabaseField(foreign=true,foreignAutoRefresh=true)
+	public Provider provider;
+	
+	@DatabaseField
+	public String url;
+	
+	@DatabaseField
 	public String balance;
 	
-	public Integer m_providerId;
-	private Provider m_provider;
+	@DatabaseField
+	public String created_at;
+	
 	private static final String TAG = "OpenTransact";
+	
+	static public Asset getCurrentAsset(Context context) {
+		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+		return Asset.find_by_url(prefs.getString("assetProviderPref",""));
+	}
 	
 	public boolean postTransaction(Context context, String to, String amount, String note, String action) {
 		String access_token = getAccessToken().token;
@@ -75,34 +99,31 @@ public class Asset {
 	}
 	
 	private AccessToken getAccessToken() {
-		return m_provider.getAccessTokenObject();
+		return provider.getAccessTokenObject();
 	}
 	
-	public void setId(Integer id) {
-		assetId = id;
+	static public Asset find(int assetId) {
+		return DatabaseManager.getInstance().getAssetWithId(assetId);
 	}
 	
-	public void setUrl(String asset_url) {
-		url = asset_url;
+	static public Asset find_by_url(String url) {
+		return DatabaseManager.getInstance().getAssetWithUrl(url);
 	}
 	
-	public void setName(String asset_name) {
-		name = asset_name;
+	static public List<Asset> all() {
+		return DatabaseManager.getInstance().getAllAssets();
 	}
 	
-	public void setBalance(String asset_balance) {
-		balance = asset_balance;
+	static public Asset create() {
+		return DatabaseManager.getInstance().newAsset();
 	}
 	
-	public void setProviderId(Integer provider_id) {
-		m_providerId = provider_id;
+	public boolean save() {
+		DatabaseManager.getInstance().updateAsset(this);
+		return true;
 	}
 	
-	public void setProvider(Provider provider) {
-		m_provider = provider;
-	}
-	
-	public Provider getProvider() {
-		return m_provider;
+	public void destroy() {
+		DatabaseManager.getInstance().deleteAsset(this);
 	}
 }

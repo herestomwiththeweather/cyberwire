@@ -26,7 +26,6 @@ public class Transactions extends ListActivity {
 	private static final String OAUTH_LISTPAYMENTS_USER_ACTION = "org.opensourcecurrency.hack.OAUTH_LISTPAYMENTS_USER";
 	private static final String OAUTH_LISTPAYMENTS_REFRESH_ACTION = "org.opensourcecurrency.hack.OAUTH_LISTPAYMENTS_REFRESH";
 	private static final String TAG = "OpenTransact";
-	private ProviderData providers;
 	private ProgressDialog progress;
 	Asset m_Asset = null;
 	Provider m_Provider = null;
@@ -36,8 +35,7 @@ public class Transactions extends ListActivity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.transactions);
 
-		providers = new ProviderData(this);
-		m_Asset = providers.getCurrentAsset(this);
+		m_Asset = Asset.getCurrentAsset(this);
 		if(null == m_Asset) {
     		Toast toast = Toast.makeText(this, "Please enter your asset provider.", Toast.LENGTH_LONG);
     		toast.setGravity(Gravity.TOP, 0, 60);
@@ -48,7 +46,7 @@ public class Transactions extends ListActivity {
 			return;
 		}
 		
-		m_Provider = m_Asset.getProvider();
+		m_Provider = m_Asset.provider;
 		
 		if(null == m_Provider.getUser()) {
 			m_Provider.getUserInfo(this, OAUTH_LISTPAYMENTS_USER_ACTION);

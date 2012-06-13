@@ -9,7 +9,6 @@ import org.apache.http.impl.client.DefaultHttpClient;
 import android.content.Context;
 import android.content.Intent;
 import android.os.AsyncTask;
-import android.util.Log;
 
 public class RestTask extends AsyncTask<HttpUriRequest, Void, String> {
 

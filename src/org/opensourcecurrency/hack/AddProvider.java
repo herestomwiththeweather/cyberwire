@@ -113,10 +113,10 @@ public class AddProvider extends Activity implements OnClickListener {
     		toast.setGravity(Gravity.CENTER, 0, 0);
     		toast.show();
  
-	    	String provider_url = m_Provider.providerUrl;
-			String redirect_url = m_Provider.redirectUrl;
-			String client_id = m_Provider.clientId;
-			String client_secret = m_Provider.clientSecret;
+	    	String provider_url = m_Provider.url;
+			String redirect_url = m_Provider.redirect_url;
+			String client_id = m_Provider.client_id;
+			String client_secret = m_Provider.client_secret;
 			
         	Log.d(TAG,"onActivityResult provider_url: " + provider_url);
         	Log.d(TAG,"onActivityResult clientid: " + client_id);
@@ -124,7 +124,7 @@ public class AddProvider extends Activity implements OnClickListener {
         	Log.d(TAG,"onActivityResult redirect_uri: " + redirect_url);
         	
        		try {
-       		  String url = m_Provider.tokenEndpoint;
+       		  String url = m_Provider.token_endpoint;
       		  HttpPost tokenRequest = new HttpPost(new URI(url));
       		  List<NameValuePair> parameters = new ArrayList<NameValuePair>();
       		  parameters.add(new BasicNameValuePair("client_id", client_id));
@@ -154,7 +154,6 @@ public class AddProvider extends Activity implements OnClickListener {
     	static final String CLIENT_DESCRIPTION = "Android app with OpenTransact support";
     	static final String TYPE = "push";
     	static final String APPLICATION_TYPE = "noredirect";
-    	private ProviderData providers = null;
 		String m_dynreg_endpoint = null;
     	
     	private String getClientRegistrationEndpoint(Intent intent) {
@@ -221,19 +220,21 @@ public class AddProvider extends Activity implements OnClickListener {
     		JSONObject clientRegistration = null;
     		try {
         		clientRegistration = new JSONObject(response);
-        		provider = providers.addProvider(m_AssetProvider,
-        				                         m_AssetProvider, 
-			                                     clientRegistration.getString("redirect_url"), 
-			                                     clientRegistration.getString("client_id"), 
-			                                     clientRegistration.getString("client_secret"),
-			                                     m_AssetProvider + "/oauth/authorize",
-			                                     m_AssetProvider + "/oauth/token"); // XXX hardcode authorization endpoint for now
-    		}catch (JSONException e) {
+        		provider = Provider.create();
+        		provider.name = m_AssetProvider;
+        		provider.url = m_AssetProvider;
+        		provider.redirect_url = clientRegistration.getString("redirect_url");
+        		provider.client_id = clientRegistration.getString("client_id");
+        		provider.client_secret = clientRegistration.getString("client_secret");
+        		provider.authorization_endpoint = m_AssetProvider + "/oauth/authorize";
+        		provider.token_endpoint = m_AssetProvider + "/oauth/token";
+        		provider.save();
+    		} catch (JSONException e) {
       		    e.printStackTrace();
-    			provider = providers.getProvider(m_AssetProvider);
+    			/*provider = providers.getProvider(m_AssetProvider);
     			if(null == provider) {
     				Log.d(TAG,"createNewProvider() provider not found.");
-    			}
+    			}*/
       		}
     		
     		return provider;
@@ -245,7 +246,7 @@ public class AddProvider extends Activity implements OnClickListener {
         	String wallet_path = "/wallet";
         	
            	try {
-            	HttpGet walletRequest = new HttpGet(new URI(provider.providerUrl + wallet_path));
+            	HttpGet walletRequest = new HttpGet(new URI(provider.url + wallet_path));
           		walletRequest.setHeader("Accept","application/json");
           		walletRequest.setHeader("Authorization","Bearer " + access_token);
             	RestTask task = new RestTask(context, WALLET_ACTION);
@@ -285,9 +286,9 @@ public class AddProvider extends Activity implements OnClickListener {
         }
         
         private void startWebView(Context context) {
-    		Log.d(TAG,"startWebView client id: " + m_Provider.clientId);
+    		Log.d(TAG,"startWebView client id: " + m_Provider.client_id);
     		Intent i = new Intent(context,WebViewActivity.class);
-    		i.setData(Uri.parse(m_Provider.authorizationEndpoint + "?client_id="+Uri.encode(m_Provider.clientId)+"&response_type=code&redirect_uri="+m_Provider.redirectUrl));
+    		i.setData(Uri.parse(m_Provider.authorization_endpoint + "?client_id="+Uri.encode(m_Provider.client_id)+"&response_type=code&redirect_uri="+m_Provider.redirect_url));
     		startActivityForResult(i,0);
         }
         
@@ -308,8 +309,8 @@ public class AddProvider extends Activity implements OnClickListener {
     	    		toast.show();
     	    		return;
     			}
-    			providers=new ProviderData(context);
-    			m_Provider = providers.getProvider(m_AssetProvider);
+
+    			m_Provider = Provider.find_by_url(m_AssetProvider);
     			if(null == m_Provider) {
     				Log.d(TAG,"Provider not found. Initiating dynamic client registration...");
         			registerOAuthClient(m_dynreg_endpoint, context);
@@ -319,10 +320,10 @@ public class AddProvider extends Activity implements OnClickListener {
     			}
     		} else if(intent.getAction().equals(DYNREG_REGISTER_ACTION)) {
         		m_Provider = createNewProvider(context,intent);
-            	Log.d(TAG,"onReceive[login] provider_name: " + m_Provider.providerName);
-            	Log.d(TAG,"onReceive[login] provider_url: " + m_Provider.providerUrl);
-            	Log.d(TAG,"onReceive[login] clientid: " + m_Provider.clientId);
-            	Log.d(TAG,"onReceive[login] redirect_uri: " + m_Provider.redirectUrl);
+            	Log.d(TAG,"onReceive[login] provider_name: " + m_Provider.name);
+            	Log.d(TAG,"onReceive[login] provider_url: " + m_Provider.url);
+            	Log.d(TAG,"onReceive[login] clientid: " + m_Provider.client_id);
+            	Log.d(TAG,"onReceive[login] redirect_uri: " + m_Provider.redirect_url);
             	startWebView(context);
     		} else if(intent.getAction().equals(OAUTH_TOKEN_ACTION)) {
     			String token = null;

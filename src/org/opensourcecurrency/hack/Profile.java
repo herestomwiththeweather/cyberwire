@@ -1,8 +1,5 @@
 package org.opensourcecurrency.hack;
 
-import java.net.URI;
-
-import org.apache.http.client.methods.HttpGet;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -21,7 +18,6 @@ public class Profile extends Activity {
 	
 	private static final String PROFILE_ACTION = "org.opensourcecurrency.hack.PROFILE";
 	private static final String TAG = "OpenTransact";
-	private ProviderData providers;
 	private ProgressDialog progress;
 	
     @Override
@@ -29,8 +25,7 @@ public class Profile extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.profile);
         
-		providers = new ProviderData(this);
-		Asset asset = providers.getCurrentAsset(this);
+		Asset asset = Asset.getCurrentAsset(this);
 		if(null == asset) {
     		Toast toast = Toast.makeText(this, "Please enter your asset provider.", Toast.LENGTH_LONG);
     		toast.setGravity(Gravity.TOP, 0, 60);
@@ -41,7 +36,7 @@ public class Profile extends Activity {
 			return;
 		}
 		
-		Provider provider = asset.getProvider();
+		Provider provider = asset.provider;
 		
 		User user = provider.getUser();
 		if(null == user) {
@@ -87,9 +82,8 @@ public class Profile extends Activity {
               JSONObject profile_response = new JSONObject(response);
           	  String email = profile_response.getString("email");
           	  Log.d(TAG,"adding email: " + email);
-      		  providers = new ProviderData(context);
-    		  Asset asset = providers.getCurrentAsset(context);
-    		  Provider provider = asset.getProvider();
+    		  Asset asset = Asset.getCurrentAsset(context);
+    		  Provider provider = asset.provider;
     		  provider.addUser(profile_response);
     		} catch (JSONException e) {
     		  e.printStackTrace();

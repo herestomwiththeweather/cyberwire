@@ -1,10 +1,9 @@
 package org.opensourcecurrency.hack;
 
-import java.util.ArrayList;
+import java.util.List;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.database.Cursor;
 import android.os.Bundle;
 import android.preference.PreferenceActivity;
 import android.preference.PreferenceScreen;
@@ -18,7 +17,6 @@ import android.util.Log;
 public class Prefs extends PreferenceActivity implements OnSharedPreferenceChangeListener {
 	private static final String TAG = "OpenTransact";
 	private static final String PREFCHANGE_ACTION = "org.opensourcecurrency.hack.PREF_CHANGE";
-	private ProviderData providers;
 	
 	   @Override
 	   protected void onCreate(Bundle savedInstanceState) {
@@ -48,18 +46,12 @@ public class Prefs extends PreferenceActivity implements OnSharedPreferenceChang
 	   private PreferenceScreen createPreferenceHierarchy() {
 	        // Root
 	        PreferenceScreen root = getPreferenceManager().createPreferenceScreen(this);
-	        Cursor cursor;
 
 	        String [] asset_urls;
 	        String [] asset_names;
 	        
-			providers = new ProviderData(this);
-			ArrayList<Asset> assets;
-	    	try {
-	    		assets = providers.getAssets("", new String[] {});
-	    	} finally {
-	    		providers.close();
-	    	}
+
+	    	List<Asset> assets = Asset.all();
 	
 	    	Log.d(TAG, "XXX -----------------------------------------------------------");
 

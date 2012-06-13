@@ -1,10 +1,10 @@
 package org.opensourcecurrency.hack;
 
-import static org.opensourcecurrency.hack.ConstantsAssets.ASSET_PROVIDER_ID;
-
 import java.net.URI;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Date;
 
 import org.apache.http.NameValuePair;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
@@ -14,73 +14,83 @@ import org.apache.http.message.BasicNameValuePair;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import com.j256.ormlite.dao.ForeignCollection;
+import com.j256.ormlite.field.DatabaseField;
+import com.j256.ormlite.field.ForeignCollectionField;
+import com.j256.ormlite.table.DatabaseTable;
+
+import org.opensourcecurrency.hack.db.DatabaseManager;
+
 import android.content.Context;
 import android.content.Intent;
 import android.util.Log;
 import android.view.Gravity;
 import android.widget.Toast;
 
+@DatabaseTable
 public class Provider {
-	public Integer providerId;
-	public String providerName;
-	public String providerUrl;
-	public String redirectUrl;
-	public String clientId;
-	public String clientSecret;
-	public String authorizationEndpoint;
-	public String tokenEndpoint;
+	@DatabaseField(generatedId=true)
+	public int id;
+	
+	@DatabaseField
+	public String name;
+	
+	@ForeignCollectionField
+	private ForeignCollection<Asset> assets;
+	
+	@ForeignCollectionField
+	private ForeignCollection<AccessToken> access_tokens;
+	
+	@ForeignCollectionField
+	private ForeignCollection<User> users;
+	
+	@DatabaseField
+	public String url;
+	
+	@DatabaseField
+	public String redirect_url;
+	
+	@DatabaseField
+	public String client_id;
+	
+	@DatabaseField
+	public String client_secret;
+	
+	@DatabaseField
+	public String authorization_endpoint;
+	
+	@DatabaseField
+	public String token_endpoint;
+	
+	@DatabaseField
+	public String created_at;
 	
 	private AccessToken m_AccessToken = null;
-	
-	private ProviderData m_providers;
 	private static final String TAG = "OpenTransact";
 	
-	public Provider(ProviderData providers) {
-		m_providers = providers;
-	}
-	
-	public void setId(Integer id) {
-		providerId = id;
-	}
-	
-	public void setName(String name) {
-		providerName = name;
-	}
-	
-	public void setProviderUrl(String provider_url) {
-		providerUrl = provider_url;
-	}
-	
-	public void setRedirectUrl(String redirect_url) {
-		redirectUrl = redirect_url;
-	}
-	
-	public void setClientId(String client_id) {
-		clientId = client_id;
-	}
-	
-	public void setClientSecret(String client_secret) {
-		clientSecret = client_secret;
-	}
-	
-	public void setAuthorizationEndpoint(String authorization_endpoint) {
-		authorizationEndpoint = authorization_endpoint;
-	}
-	
-	public void setTokenEndpoint(String token_endpoint) {
-		tokenEndpoint = token_endpoint;
-	}
-	
-	public void addAccessToken(String token, Integer expires_in, String refresh_token) {
+	public void addAccessToken(String token, Integer expires_in, String rtoken) {
 		Log.d(TAG,"XXX addAccessToken persisting: "+token);
-		Integer refresh_token_id = 0;
-		if(null != refresh_token) {
-			refresh_token_id = m_providers.addRefreshToken(providerId,refresh_token);
+
+		AccessToken access_token = AccessToken.create();
+		access_token.token = token;
+		access_token.provider = this;
+		Date now = new Date();
+		SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+		
+		access_token.expires_at = dateFormat.format(new Date(now.getTime()+(expires_in*1000)));
+		
+		if(null != rtoken) {
+			RefreshToken refresh_token = RefreshToken.create();
+			refresh_token.token = rtoken;
+			refresh_token.provider = this;
+			refresh_token.save();
+			access_token.refresh_token = refresh_token;
 		} else if(null != m_AccessToken) {
-			refresh_token_id = m_AccessToken.refreshTokenId;
+			access_token.refresh_token = m_AccessToken.refresh_token;
   		    discardAccessToken();
 		}
-		m_providers.addAccessToken(providerId,token,expires_in,refresh_token_id);
+		access_token.save();
+		m_AccessToken = access_token;
 	}
 	
     public String addAccessToken(Context context, Intent intent) {
@@ -119,7 +129,12 @@ public class Provider {
     }
     
 	public void addAsset(String name, String url, String balance) {
-		m_providers.addAsset(providerId,name,url,balance);
+		Asset asset = Asset.create();
+		asset.name = name;
+		asset.url = url;
+		asset.balance = balance;
+		asset.provider = this;
+		asset.save();
 	}
 	
 	public void getUserInfo(Context context, String action) {
@@ -129,7 +144,7 @@ public class Provider {
 		String about_user="/user_info";
 
     	try {
-        	HttpGet userinfoRequest = new HttpGet(new URI(providerUrl + about_user));
+        	HttpGet userinfoRequest = new HttpGet(new URI(url + about_user));
       		userinfoRequest.setHeader("Accept","application/json");
       		userinfoRequest.setHeader("Authorization","Bearer " + access_token);
         	RestTask task = new RestTask(context, action);
@@ -147,26 +162,28 @@ public class Provider {
 			String website_url = r.getString("website");
 			String picture_url = r.getString("picture");
 			String user_id = r.getString("user_id");
-			m_providers.addUser(providerId,name,email,url,website_url,picture_url,user_id);
+			
+			User user = User.create();
+			user.name = name;
+			user.provider = this;
+			user.email = email;
+			user.url = url;
+			user.website_url = website_url;
+			user.picture_url = picture_url;
+			user.user_id = user_id;
+			user.save();
 		} catch (JSONException e) {
   		  e.printStackTrace();
   		}
 	}
 	
-	public ArrayList<Asset> getAssets() {
-		ArrayList<Asset> assets;
-		
-    	try {
-    		assets = m_providers.getAssets(ASSET_PROVIDER_ID + " = ?", new String[] {providerId.toString()});
-    	} finally {
-    		m_providers.close();
-    	}
-    	
-    	return assets;
-	}
-	
 	public User getUser() {
-		return m_providers.getUser(providerId);
+		List<User> users = getUsers();
+		if(0 == users.size()) {
+			return null;
+		} else {
+			return users.get(0);
+		}
 	}
 	
 	public boolean handleNetworkError(Context context, Intent intent, String action) {
@@ -184,19 +201,19 @@ public class Provider {
 	
 	public boolean postRefreshToken(Context context, String action) {
 		
-    	Log.d(TAG,"onActivityResult clientid: " + clientId);
-    	Log.d(TAG,"onActivityResult client secret: " + clientSecret);
-    	Log.d(TAG,"onActivityResult redirect_uri: " + redirectUrl);
+    	Log.d(TAG,"onActivityResult clientid: " + client_id);
+    	Log.d(TAG,"onActivityResult client secret: " + client_secret);
+    	Log.d(TAG,"onActivityResult redirect_uri: " + redirect_url);
     	
    		try {
-    		  String url = tokenEndpoint;
+    		  String url = token_endpoint;
     		  HttpPost tokenRequest = new HttpPost(new URI(url));
     		  List<NameValuePair> parameters = new ArrayList<NameValuePair>();
-    		  parameters.add(new BasicNameValuePair("client_id", clientId));
-    		  parameters.add(new BasicNameValuePair("client_secret", clientSecret));
-    		  parameters.add(new BasicNameValuePair("refresh_token", getAccessTokenObject().refreshToken(context)));
+    		  parameters.add(new BasicNameValuePair("client_id", client_id));
+    		  parameters.add(new BasicNameValuePair("client_secret", client_secret));
+    		  parameters.add(new BasicNameValuePair("refresh_token", getAccessTokenObject().refresh_token.token));
     		  parameters.add(new BasicNameValuePair("grant_type","refresh_token"));
-    		  parameters.add(new BasicNameValuePair("redirect_uri",redirectUrl));
+    		  parameters.add(new BasicNameValuePair("redirect_uri",redirect_url));
     		  tokenRequest.setEntity(new UrlEncodedFormEntity(parameters));
     		  
     		  RestTask task = new RestTask(context, action);
@@ -215,7 +232,8 @@ public class Provider {
 
 	public AccessToken getAccessTokenObject() {
 		if(null == m_AccessToken) {
-			m_AccessToken = m_providers.getAccessToken(providerId);
+			// XXX use most recent!
+			m_AccessToken = getAccessTokens().get(0);
 		}
 		return m_AccessToken;
 	}
@@ -227,5 +245,54 @@ public class Provider {
 		} else {
 			return getAccessTokenObject().token;
 		}
+	}
+	
+	public List<Asset> getAssets() {
+		ArrayList<Asset> assetList = new ArrayList<Asset>();
+		for (Asset asset : assets) {
+			assetList.add(asset);
+		}
+		return assetList;
+	}
+	
+	public List<AccessToken> getAccessTokens() {
+		ArrayList<AccessToken> accessTokenList = new ArrayList<AccessToken>();
+		for(AccessToken access_token : access_tokens) {
+			accessTokenList.add(access_token);
+		}
+		return accessTokenList;
+	}
+	
+	public List<User> getUsers() {
+		ArrayList<User> userList = new ArrayList<User>();
+		for (User user : users) {
+			userList.add(user);
+		}
+		return userList;
+	}
+	
+	static public Provider find(int providerId) {
+		return DatabaseManager.getInstance().getProviderWithId(providerId);
+	}
+	
+	static public Provider find_by_url(String url) {
+		return DatabaseManager.getInstance().getProviderWithUrl(url);
+	}
+	
+	static public List<Provider> all() {
+		return DatabaseManager.getInstance().getAllProviders();
+	}
+	
+	static public Provider create() {
+		return DatabaseManager.getInstance().newProvider();
+	}
+	
+	public boolean save() {
+		DatabaseManager.getInstance().updateProvider(this);
+		return true;
+	}
+	
+	public void destroy() {
+		DatabaseManager.getInstance().deleteProvider(this);
 	}
 }

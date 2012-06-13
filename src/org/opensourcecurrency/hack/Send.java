@@ -6,24 +6,13 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.view.Gravity;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
-
-import java.net.URI;
-import java.util.ArrayList;
-import java.util.List;
-
-import org.apache.http.NameValuePair;
-import org.apache.http.client.entity.UrlEncodedFormEntity;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.message.BasicNameValuePair;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -38,7 +27,6 @@ public class Send extends Activity implements OnClickListener {
 
 
 	private static final String TAG = "OpenTransact";
-	private ProviderData providers;
 	private ProgressDialog progress;
 
 	private EditText toText;
@@ -55,8 +43,7 @@ public class Send extends Activity implements OnClickListener {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.send);  
         
-		providers = new ProviderData(this);
-		m_Asset = providers.getCurrentAsset(this);
+		m_Asset = Asset.getCurrentAsset(this);
 		if(null == m_Asset) {
     		Toast toast = Toast.makeText(this, "Please enter your asset provider.", Toast.LENGTH_LONG);
     		toast.setGravity(Gravity.TOP, 0, 60);
@@ -77,7 +64,7 @@ public class Send extends Activity implements OnClickListener {
     
     @Override
     public void onClick(View view) {    	
-		m_Provider = m_Asset.getProvider();
+		m_Provider = m_Asset.provider;
 		String access_token = m_Provider.getAccessToken();
         Log.d(TAG,"access_token : " + access_token);
         
