@@ -118,7 +118,7 @@ public class Cyberwire extends Activity implements OnClickListener {
     		startActivity(i);
     		return true;
     	case R.id.reset:
-        	this.deleteDatabase("providers.sqlite");
+        	DatabaseManager.clear();
     		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
     		SharedPreferences.Editor editor = prefs.edit();
     		editor.remove("assetProviderPref");

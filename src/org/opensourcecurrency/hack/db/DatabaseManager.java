@@ -22,6 +22,14 @@ public class DatabaseManager {
 			instance = new DatabaseManager(ctx);
 		}
 	}
+	
+	static public void clear() {
+		getInstance().clearDatabase();
+	}
+	
+	private void clearDatabase() {
+		getHelper().clearDatabase();
+	}
 
 	static public DatabaseManager getInstance() {
 		return instance;

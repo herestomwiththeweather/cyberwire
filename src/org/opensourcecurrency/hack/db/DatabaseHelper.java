@@ -36,6 +36,20 @@ public class DatabaseHelper extends OrmLiteSqliteOpenHelper {
 	public DatabaseHelper(Context context) {
 		super(context, DATABASE_NAME, null, DATABASE_VERSION);
 	}
+	
+	public void clearDatabase() {
+		try {
+			TableUtils.clearTable(connectionSource, Asset.class);
+			TableUtils.clearTable(connectionSource, Provider.class);
+			TableUtils.clearTable(connectionSource, AccessToken.class);
+			TableUtils.clearTable(connectionSource, RefreshToken.class);
+			TableUtils.clearTable(connectionSource, User.class);
+		} catch (SQLException e) {
+			throw new RuntimeException(e);
+		} catch (java.sql.SQLException e) {
+			e.printStackTrace();
+		}
+	}
 
 	@Override
 	public void onCreate(SQLiteDatabase database,ConnectionSource connectionSource) {
